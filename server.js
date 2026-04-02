@@ -4,11 +4,10 @@ const session = require("express-session");
 const app = express();
 
 // ====== CONFIG ======
-const CLIENT_ID = "1488617439142084608";
-const CLIENT_SECRET = "sHa5rwsBcgTVgzZgyjHHyPcl2bo2lNTC";
-const REDIRECT_URI = "http://localhost:3000/callback";
-
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxEjWH4eRezJVw6Tdm9_2ojCgCQS_p0wDfztktR7WhsCaoFZoCCbp5i3_7o44iZglhl/exec";
+const CLIENT_ID = process.env."1488617439142084608";
+const CLIENT_SECRET = process.env."sHa5rwsBcgTVgzZgyjHHyPcl2bo2lNTC";
+const REDIRECT_URI = process.env.REDIRECT_URI;
+const SHEET_URL = process.env."https://script.google.com/macros/s/AKfycbxEjWH4eRezJVw6Tdm9_2ojCgCQS_p0wDfztktR7WhsCaoFZoCCbp5i3_7o44iZglhl/exec";
 
 // ====== MIDDLEWARE ======
 app.use(express.json());
