@@ -1,95 +1,111 @@
 const express = require("express");
 const session = require("express-session");
+const fetch = require("node-fetch");
+require("dotenv").config();
 
 const app = express();
 
-// ====== CONFIG ======
+// ===== MIDDLEWARE =====
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: "supersecretkey",
+  resave: false,
+  saveUninitialized: false
+}));
+
+// ===== ENV VARIABLES =====
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const SHEET_URL = process.env.SHEET_URL;
 
-// ====== MIDDLEWARE ======
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// DEBUG (you can remove later)
+console.log("REDIRECT_URI:", REDIRECT_URI);
 
-app.use(
-  session({
-    secret: "secret-key",
-    resave: false,
-    saveUninitialized: false
-  })
-);
-
-// ====== ROUTES ======
-
-// Home (serve your HTML)
+// ===== HOME =====
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
+  res.sendFile(__dirname + "/index.html");
 });
 
-// Login redirect
+// ===== LOGIN =====
 app.get("/login", (req, res) => {
-  const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
-    REDIRECT_URI
-  )}&response_type=code&scope=identify`;
-
+  const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
 });
 
-// OAuth callback
+// ===== CALLBACK (VERY IMPORTANT) =====
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
 
-  const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      grant_type: "authorization_code",
-      code: code,
-      redirect_uri: REDIRECT_URI
-    })
-  });
+  if (!code) {
+    return res.send("No code provided");
+  }
 
-  const tokenData = await tokenRes.json();
+  try {
+    // Exchange code for access token
+    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: REDIRECT_URI
+      })
+    });
 
-  const userRes = await fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: `Bearer ${tokenData.access_token}`
+    const tokenData = await tokenRes.json();
+
+    if (!tokenData.access_token) {
+      console.error("Token error:", tokenData);
+      return res.send("Failed to get access token");
     }
-  });
 
-  const userData = await userRes.json();
+    // Get user info
+    const userRes = await fetch("https://discord.com/api/users/@me", {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`
+      }
+    });
 
-  req.session.user = userData;
+    const user = await userRes.json();
 
-  res.redirect("/");
+    // Save session
+    req.session.user = user;
+
+    // Redirect back to site
+    res.redirect("/");
+  } catch (err) {
+    console.error("Callback error:", err);
+    res.send("OAuth failed");
+  }
 });
 
-// Get logged-in user
+// ===== GET USER =====
 app.get("/user", (req, res) => {
   res.json(req.session.user || null);
 });
 
-// Logout
+// ===== LOGOUT =====
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/");
   });
 });
 
-// ====== SUBMIT APPLICATION ======
+// ===== SUBMIT FORM =====
 app.post("/submit", async (req, res) => {
   try {
     const data = req.body;
 
-    console.log("Received application:", data);
+    console.log("Application:", data);
 
-    const response = await fetch(SHEET_URL, {
+    await fetch(SHEET_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -97,18 +113,16 @@ app.post("/submit", async (req, res) => {
       body: JSON.stringify(data)
     });
 
-    const text = await response.text();
-    console.log("Apps Script response:", text);
-
     res.json({ success: true });
-
   } catch (err) {
-    console.error("ERROR:", err);
-    res.status(500).send("Server error");
+    console.error("Submit error:", err);
+    res.status(500).send("Error submitting form");
   }
 });
 
-// ====== START SERVER ======
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+// ===== START SERVER =====
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
