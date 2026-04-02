@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>150 Player Pirate Civilization Event</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+
+      background:
+        linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+        url("https://static.planetminecraft.com/files/image/minecraft/project/2024/592/17901293-c_l.webp");
+
+      background-size: cover;
+      background-position: center;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: rgba(20, 20, 20, 0.9);
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      background: #1f1f1f;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #5865F2;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #4752c4;
+    }
+
+    .secondary {
+      background: #444;
+    }
+
+    #thankYouMessage {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <div id="content"></div>
+
+  <div id="thankYouMessage">
+    <h2>Thank you for applying for Sarkovia Events!</h2>
+    <p>You'll hear news about your application shortly...</p>
+  </div>
+</div>
+
+<script>
+async function loadUser() {
+  const res = await fetch("/user");
+  const user = await res.json();
+
+  const content = document.getElementById("content");
+
+  if (!user) {
+    content.innerHTML = `
+      <h1>150 Player Pirate Civilization Event</h1>
+      <p>Please login with Discord</p>
+      <a href="/login"><button>Login with Discord</button></a>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <h1>150 Player Pirate Civilization Event</h1>
+    <p>Logged in as <b>${user.username}</b></p>
+
+    <a href="/logout"><button class="secondary">Logout</button></a>
+
+    <hr>
+
+    <form id="applicationForm">
+      <input name="ign" placeholder="Minecraft IGN" required>
+
+      <input name="discord" value="${user.username}" readonly>
+
+      <textarea name="plans" placeholder="Plans for event" required></textarea>
+
+      <textarea name="experience" placeholder="Previous experience" required></textarea>
+
+      <textarea name="contribution" placeholder="What will you contribute?" required></textarea>
+
+      <button type="submit">Submit Application</button>
+    </form>
+  `;
+
+  // Attach submit handler AFTER form is created
+  const form = document.getElementById("applicationForm");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    await fetch("/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    form.style.display = "none";
+    document.getElementById("thankYouMessage").style.display = "block";
+  });
+}
+
+loadUser();
+</script>
+
+</body>
+</html>
