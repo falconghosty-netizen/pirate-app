@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>150 Player Pirate Civilization Event</title>
+  <title>Event Applications</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -73,33 +73,19 @@
 <body>
 
 <div class="container">
-  <div id="content"></div>
 
-  <div id="thankYouMessage">
-    <h2>Thank you for applying for Sarkovia Events!</h2>
-    <p>You'll hear news about your application shortly...</p>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage">
+    <h1>Event Applications</h1>
+    <p>Please login with Discord</p>
+    <a href="/login"><button>Login with Discord</button></a>
   </div>
-</div>
 
-<script>
-async function loadUser() {
-  const res = await fetch("/user");
-  const user = await res.json();
+  <!-- APPLICATION PAGE -->
+  <div id="appPage" style="display:none;">
+    <h1>Event Applications</h1>
 
-  const content = document.getElementById("content");
-
-  if (!user) {
-    content.innerHTML = `
-      <h1>150 Player Pirate Civilization Event</h1>
-      <p>Please login with Discord</p>
-      <a href="/login"><button>Login with Discord</button></a>
-    `;
-    return;
-  }
-
-  content.innerHTML = `
-    <h1>150 Player Pirate Civilization Event</h1>
-    <p>Logged in as <b>${user.username}</b></p>
+    <p>Logged in as <b id="username"></b></p>
 
     <a href="/logout"><button class="secondary">Logout</button></a>
 
@@ -108,7 +94,7 @@ async function loadUser() {
     <form id="applicationForm">
       <input name="ign" placeholder="Minecraft IGN" required>
 
-      <input name="discord" value="${user.username}" readonly>
+      <input name="discord" id="discordField" readonly>
 
       <textarea name="plans" placeholder="Plans for event" required></textarea>
 
@@ -118,9 +104,36 @@ async function loadUser() {
 
       <button type="submit">Submit Application</button>
     </form>
-  `;
 
-  // Attach submit handler AFTER form is created
+    <div id="thankYouMessage">
+      <h2>Thank you for applying for Sarkovia Events!</h2>
+      <p>You'll hear news about your application shortly.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function init() {
+  const res = await fetch("/user");
+  const user = await res.json();
+
+  const loginPage = document.getElementById("loginPage");
+  const appPage = document.getElementById("appPage");
+
+  if (!user) {
+    loginPage.style.display = "block";
+    appPage.style.display = "none";
+    return;
+  }
+
+  // Show app page
+  loginPage.style.display = "none";
+  appPage.style.display = "block";
+
+  document.getElementById("username").innerText = user.username;
+  document.getElementById("discordField").value = user.username;
+
   const form = document.getElementById("applicationForm");
 
   form.addEventListener("submit", async (e) => {
@@ -141,7 +154,7 @@ async function loadUser() {
   });
 }
 
-loadUser();
+init();
 </script>
 
 </body>

@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const path = require("path");
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -10,23 +11,34 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "supersecretkey",
+  secret: "secret123",
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: false // IMPORTANT for localhost
+  }
 }));
 
-// ===== ENV VARIABLES =====
+// ===== ENV =====
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const SHEET_URL = process.env.SHEET_URL;
 
-// DEBUG (you can remove later)
-console.log("REDIRECT_URI:", REDIRECT_URI);
+// Debug (optional)
+console.log("ENV CHECK:", {
+  CLIENT_ID: !!CLIENT_ID,
+  CLIENT_SECRET: !!CLIENT_SECRET,
+  REDIRECT_URI,
+  SHEET_URL
+});
+
+// ===== STATIC FILES =====
+app.use(express.static(path.join(__dirname, "public")));
 
 // ===== HOME =====
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // ===== LOGIN =====
@@ -35,16 +47,14 @@ app.get("/login", (req, res) => {
   res.redirect(url);
 });
 
-// ===== CALLBACK (VERY IMPORTANT) =====
+// ===== CALLBACK =====
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
 
-  if (!code) {
-    return res.send("No code provided");
-  }
+  if (!code) return res.send("No code received");
 
   try {
-    // Exchange code for access token
+    // Exchange code for token
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       headers: {
@@ -61,11 +71,6 @@ app.get("/callback", async (req, res) => {
 
     const tokenData = await tokenRes.json();
 
-    if (!tokenData.access_token) {
-      console.error("Token error:", tokenData);
-      return res.send("Failed to get access token");
-    }
-
     // Get user info
     const userRes = await fetch("https://discord.com/api/users/@me", {
       headers: {
@@ -75,18 +80,17 @@ app.get("/callback", async (req, res) => {
 
     const user = await userRes.json();
 
-    // Save session
+    // Save user in session
     req.session.user = user;
 
-    // Redirect back to site
     res.redirect("/");
   } catch (err) {
-    console.error("Callback error:", err);
-    res.send("OAuth failed");
+    console.error(err);
+    res.send("Login failed");
   }
 });
 
-// ===== GET USER =====
+// ===== USER CHECK =====
 app.get("/user", (req, res) => {
   res.json(req.session.user || null);
 });
@@ -98,31 +102,27 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// ===== SUBMIT FORM =====
+// ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
-    const data = req.body;
-
-    console.log("Application:", data);
-
     await fetch(SHEET_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(req.body)
     });
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Submit error:", err);
-    res.status(500).send("Error submitting form");
+    console.error(err);
+    res.status(500).send("Error submitting");
   }
 });
 
 // ===== START SERVER =====
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port", PORT);
 });
