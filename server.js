@@ -15,7 +15,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false // IMPORTANT for localhost
+    secure: true,
+    httpOnly: true,
+    sameSite: 'lax'
   }
 }));
 
