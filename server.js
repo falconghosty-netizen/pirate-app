@@ -5,9 +5,9 @@ const app = express();
 
 // ====== CONFIG ======
 const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env."sHa5rwsBcgTVgzZgyjHHyPcl2bo2lNTC";
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const SHEET_URL = process.env."https://script.google.com/macros/s/AKfycbxEjWH4eRezJVw6Tdm9_2ojCgCQS_p0wDfztktR7WhsCaoFZoCCbp5i3_7o44iZglhl/exec";
+const SHEET_URL = process.env.SHEET_URL;
 
 // ====== MIDDLEWARE ======
 app.use(express.json());
