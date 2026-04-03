@@ -120,6 +120,12 @@ app.post("/submit", async (req, res) => {
 
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
+    // ✅ Build correct Discord name
+    let discordName = user.username;
+
+    // fallback safety (just in case)
+    if (!discordName) discordName = "Unknown User";
+
     const embed = new EmbedBuilder()
       .setTitle("📥 New Application")
       .setColor(0x5865F2)
@@ -130,8 +136,13 @@ app.post("/submit", async (req, res) => {
           inline: false
         },
         {
-          name: "Discord",
-          value: user.tag,
+          name: "Discord Username",
+          value: discordName,
+          inline: false
+        },
+        {
+          name: "Discord ID",
+          value: user.id,
           inline: false
         },
         {
