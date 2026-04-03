@@ -142,7 +142,7 @@ app.post("/submit", async (req, res) => {
         },
         {
           name: "Discord ID",
-          value: user.id,
+          value: user.name,
           inline: false
         },
         {
