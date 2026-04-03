@@ -108,26 +108,24 @@ app.post("/submit", async (req, res) => {
   try {
     const {
       ign,
-      discordUsername,
-      discordId,
+      discord,
       plans,
       experience,
-      actions
+      contribution
     } = req.body;
 
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
 
-    const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
     const embed = new EmbedBuilder()
       .setTitle("📥 New Application")
       .addFields(
-        { name: "Minecraft IGN", value: ign },
-        { name: "Discord Username", value: discordUsername },
-        { name: "Discord ID", value: discordId },
-        { name: "Plans", value: plans },
-        { name: "Experience", value: experience },
-        { name: "Contribution", value: actions }
+        { name: "Minecraft IGN", value: ign || "N/A" },
+        { name: "Discord", value: discord || "N/A" },
+        { name: "Plans", value: plans || "N/A" },
+        { name: "Experience", value: experience || "N/A" },
+        { name: "Contribution", value: contribution || "N/A" }
       )
       .setColor(0x5865F2);
 
