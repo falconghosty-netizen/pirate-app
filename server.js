@@ -16,7 +16,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false // IMPORTANT for localhost
+    secure: false // set true only with HTTPS
   }
 }));
 
@@ -24,14 +24,12 @@ app.use(session({
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const SHEET_URL = process.env.SHEET_URL;
 
-// Debug (optional)
+// Debug
 console.log("ENV CHECK:", {
   CLIENT_ID: !!CLIENT_ID,
   CLIENT_SECRET: !!CLIENT_SECRET,
-  REDIRECT_URI,
-  SHEET_URL
+  REDIRECT_URI
 });
 
 // ===== STATIC FILES =====
@@ -51,7 +49,6 @@ app.get("/login", (req, res) => {
 // ===== CALLBACK =====
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
-
   if (!code) return res.send("No code received");
 
   try {
@@ -65,14 +62,14 @@ app.get("/callback", async (req, res) => {
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
         grant_type: "authorization_code",
-        code: code,
+        code,
         redirect_uri: REDIRECT_URI
       })
     });
 
     const tokenData = await tokenRes.json();
 
-    // Get user info
+    // Get user
     const userRes = await fetch("https://discord.com/api/users/@me", {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`
@@ -81,7 +78,7 @@ app.get("/callback", async (req, res) => {
 
     const user = await userRes.json();
 
-    // Save user in session
+    // Save to session
     req.session.user = user;
 
     res.redirect("/");
@@ -106,9 +103,14 @@ app.get("/logout", (req, res) => {
 // ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
+    const user = req.session.user;
+
+    if (!user) {
+      return res.status(401).json({ error: "Not logged in with Discord" });
+    }
+
     const {
       ign,
-      discord,
       plans,
       experience,
       contribution
@@ -120,14 +122,35 @@ app.post("/submit", async (req, res) => {
 
     const embed = new EmbedBuilder()
       .setTitle("📥 New Application")
+      .setColor(0x5865F2)
       .addFields(
-        { name: "Minecraft IGN", value: ign || "N/A" },
-        { name: "Discord", value: discord || "N/A" },
-        { name: "Plans", value: plans || "N/A" },
-        { name: "Experience", value: experience || "N/A" },
-        { name: "Contribution", value: contribution || "N/A" }
+        {
+          name: "Minecraft IGN",
+          value: ign || "N/A",
+          inline: false
+        },
+        {
+          name: "Discord",
+          value: `${user.username}#${user.discriminator}`,
+          inline: false
+        },
+        {
+          name: "Plans",
+          value: plans || "N/A",
+          inline: false
+        },
+        {
+          name: "Experience",
+          value: experience || "N/A",
+          inline: false
+        },
+        {
+          name: "Contribution",
+          value: contribution || "N/A",
+          inline: false
+        }
       )
-      .setColor(0x5865F2);
+      .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -153,7 +176,6 @@ app.post("/submit", async (req, res) => {
     res.status(500).send("Error submitting");
   }
 });
-
 // ===== START SERVER =====
 const PORT = process.env.PORT || 3000;
 
