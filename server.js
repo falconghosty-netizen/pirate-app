@@ -1,3 +1,4 @@
+const client = require("./bot");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -105,15 +106,50 @@ app.get("/logout", (req, res) => {
 // ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
-    await fetch(SHEET_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(req.body)
+    const {
+      ign,
+      discordUsername,
+      discordId,
+      plans,
+      experience,
+      actions
+    } = req.body;
+
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+
+    const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+
+    const embed = new EmbedBuilder()
+      .setTitle("📥 New Application")
+      .addFields(
+        { name: "Minecraft IGN", value: ign },
+        { name: "Discord Username", value: discordUsername },
+        { name: "Discord ID", value: discordId },
+        { name: "Plans", value: plans },
+        { name: "Experience", value: experience },
+        { name: "Contribution", value: actions }
+      )
+      .setColor(0x5865F2);
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("accept")
+        .setLabel("Accept")
+        .setStyle(ButtonStyle.Success),
+
+      new ButtonBuilder()
+        .setCustomId("deny")
+        .setLabel("Deny")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({
+      embeds: [embed],
+      components: [row]
     });
 
     res.json({ success: true });
+
   } catch (err) {
     console.error(err);
     res.status(500).send("Error submitting");
