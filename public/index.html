@@ -94,7 +94,6 @@
     <form id="applicationForm">
       <input name="ign" id="ign" placeholder="Minecraft IGN" required>
 
-      <!-- ✅ Discord username auto-filled -->
       <input 
         name="discordName" 
         id="discordName" 
@@ -137,7 +136,6 @@ async function init() {
   loginPage.style.display = "none";
   appPage.style.display = "block";
 
-  // Display username at top
   let displayName = "Unknown User";
 
   if (user.global_name) {
@@ -149,8 +147,6 @@ async function init() {
   }
 
   document.getElementById("username").innerText = displayName;
-
-  // ✅ Auto-fill Discord input box
   document.getElementById("discordName").value = displayName;
 
   const form = document.getElementById("applicationForm");
@@ -160,13 +156,20 @@ async function init() {
 
     const data = Object.fromEntries(new FormData(form).entries());
 
-    await fetch("/submit", {
+    const res = await fetch("/submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
     });
+
+    // ✅ ADDED: error handling
+    if (!res.ok) {
+      const text = await res.text();
+      alert("Submission failed: " + text);
+      return;
+    }
 
     form.style.display = "none";
     document.getElementById("thankYouMessage").style.display = "block";

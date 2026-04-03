@@ -16,7 +16,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false // set true only with HTTPS
+    secure: false
   }
 }));
 
@@ -25,7 +25,6 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 
-// Debug
 console.log("ENV CHECK:", {
   CLIENT_ID: !!CLIENT_ID,
   CLIENT_SECRET: !!CLIENT_SECRET,
@@ -52,7 +51,6 @@ app.get("/callback", async (req, res) => {
   if (!code) return res.send("No code received");
 
   try {
-    // Exchange code for token
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       headers: {
@@ -69,7 +67,6 @@ app.get("/callback", async (req, res) => {
 
     const tokenData = await tokenRes.json();
 
-    // Get user
     const userRes = await fetch("https://discord.com/api/users/@me", {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`
@@ -78,12 +75,13 @@ app.get("/callback", async (req, res) => {
 
     const user = await userRes.json();
 
-    // Save to session
     req.session.user = user;
+
+    console.log("Logged in user:", user.username);
 
     res.redirect("/");
   } catch (err) {
-    console.error(err);
+    console.error("OAuth error:", err);
     res.send("Login failed");
   }
 });
@@ -103,28 +101,45 @@ app.get("/logout", (req, res) => {
 // ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
+    console.log("SUBMIT ROUTE HIT");
+
+    const user = req.session.user;
+
+    if (!user) {
+      console.log("User not logged in");
+      return res.status(401).json({ error: "Not logged in with Discord" });
+    }
+
     const {
       ign,
-      discord,
       plans,
       experience,
       contribution
     } = req.body;
 
+    console.log("Form data:", req.body);
+
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+
+    if (!channel) {
+      console.log("Channel not found");
+      return res.status(500).send("Channel not found");
+    }
 
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
     const embed = new EmbedBuilder()
       .setTitle("📥 New Application")
+      .setColor(0x5865F2)
       .addFields(
-        { name: "Minecraft IGN", value: ign || "N/A" },
-        { name: "Discord", value: discord || "N/A" },
-        { name: "Plans", value: plans || "N/A" },
-        { name: "Experience", value: experience || "N/A" },
-        { name: "Contribution", value: contribution || "N/A" }
+        { name: "Minecraft IGN", value: ign || "N/A", inline: false },
+        { name: "Discord Username", value: user.username || "N/A", inline: false },
+        { name: "Discord ID", value: user.id || "N/A", inline: false },
+        { name: "Plans", value: plans || "N/A", inline: false },
+        { name: "Experience", value: experience || "N/A", inline: false },
+        { name: "Contribution", value: contribution || "N/A", inline: false }
       )
-      .setColor(0x5865F2);
+      .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -143,10 +158,12 @@ app.post("/submit", async (req, res) => {
       components: [row]
     });
 
+    console.log("Submission sent to Discord");
+
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
+    console.error("SUBMIT ERROR:", err);
     res.status(500).send("Error submitting");
   }
 });

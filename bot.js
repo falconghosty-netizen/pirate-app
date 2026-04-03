@@ -19,7 +19,7 @@ const client = new Client({
 
 // ===== READY =====
 client.once(Events.ClientReady, () => {
-  console.log(`Bot logged in as ${client.user.tag}`);
+  console.log(`Bot logged in as ${client.user.username}`);
 });
 
 // ===== BUTTON HANDLER =====
@@ -47,7 +47,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
       .setColor(color)
       .setFooter({
-        text: `Status: ${status} by ${interaction.user.tag}`
+        text: `Status: ${status} by ${interaction.user.username}`
       });
 
     // Disable buttons
