@@ -1,25 +1,3 @@
-const { 
-  Client, 
-  GatewayIntentBits, 
-  ActionRowBuilder, 
-  ButtonBuilder, 
-  ButtonStyle, 
-  Events,
-  EmbedBuilder 
-} = require("discord.js");
-
-require("dotenv").config();
-
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
-});
-
-// When bot starts
-client.once(Events.ClientReady, () => {
-  console.log(`Bot logged in as ${client.user.tag}`);
-});
-
-// Handle button clicks
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isButton()) return;
 
@@ -29,24 +7,29 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (interaction.customId === "accept") {
       status = "✅ ACCEPTED";
-      color = 0x57F287; // green
+      color = 0x57F287;
     }
 
     if (interaction.customId === "deny") {
       status = "❌ DENIED";
-      color = 0xED4245; // red
+      color = 0xED4245;
     }
 
-    // Get original embed
+    const { EmbedBuilder } = require("discord.js");
+
     const originalEmbed = interaction.message.embeds[0];
 
-    // Rebuild embed (important — embeds are immutable)
+    // Get Discord ID from embed
+    const discordField = originalEmbed.fields.find(f => f.name === "Discord ID");
+    const discordId = discordField?.value;
+
+    // Update embed
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
       .setColor(color)
-      .setFooter({ text: `Status: ${status}` });
+      .setFooter({ text: `Status: ${status} by ${interaction.user.username}` });
 
     // Disable buttons
-    const disabledRow = new ActionRowBuilder().addComponents(
+    const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("accept")
         .setLabel("Accepted")
@@ -62,16 +45,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     await interaction.update({
       embeds: [updatedEmbed],
-      components: [disabledRow]
+      components: [row]
     });
+
+    // 🎭 GIVE ROLE ONLY ON ACCEPT
+    if (interaction.customId === "accept" && discordId && discordId !== "N/A") {
+      try {
+        const member = await interaction.guild.members.fetch(discordId);
+        await member.roles.add(process.env.ROLE_ID);
+      } catch (err) {
+        console.error("Role assignment failed:", err);
+      }
+    }
 
   } catch (err) {
     console.error(err);
     await interaction.reply({ content: "Error handling button", ephemeral: true });
   }
 });
-
-// 👇 MUST be last
-client.login(process.env.BOT_TOKEN);
-
-module.exports = client;
