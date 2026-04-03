@@ -101,17 +101,11 @@ app.get("/logout", (req, res) => {
 });
 
 // ===== SUBMIT =====
-console.log("SUBMIT ROUTE HIT");
 app.post("/submit", async (req, res) => {
   try {
-    const user = req.session.user;
-
-    if (!user) {
-      return res.status(401).json({ error: "Not logged in with Discord" });
-    }
-
     const {
       ign,
+      discord,
       plans,
       experience,
       contribution
@@ -121,48 +115,16 @@ app.post("/submit", async (req, res) => {
 
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-    // ✅ Build correct Discord name
-    let discordName = user.username;
-
-    // fallback safety (just in case)
-    if (!discordName) discordName = "Unknown User";
-
     const embed = new EmbedBuilder()
       .setTitle("📥 New Application")
-      .setColor(0x5865F2)
       .addFields(
-        {
-          name: "Minecraft IGN",
-          value: ign || "N/A",
-          inline: false
-        },
-        {
-          name: "Discord Username",
-          value: discordName,
-          inline: false
-        },
-        {
-          name: "Discord ID",
-          value: user.name,
-          inline: false
-        },
-        {
-          name: "Plans",
-          value: plans || "N/A",
-          inline: false
-        },
-        {
-          name: "Experience",
-          value: experience || "N/A",
-          inline: false
-        },
-        {
-          name: "Contribution",
-          value: contribution || "N/A",
-          inline: false
-        }
+        { name: "Minecraft IGN", value: ign || "N/A" },
+        { name: "Discord", value: discord || "N/A" },
+        { name: "Plans", value: plans || "N/A" },
+        { name: "Experience", value: experience || "N/A" },
+        { name: "Contribution", value: contribution || "N/A" }
       )
-      .setTimestamp();
+      .setColor(0x5865F2);
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
