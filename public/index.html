@@ -94,9 +94,6 @@
     <form id="applicationForm">
       <input name="ign" placeholder="Minecraft IGN" required>
 
-      <!-- ✅ Discord ID field -->
-      <input name="discordId" id="discordField" placeholder="Discord ID" readonly>
-
       <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
 
       <textarea name="experience" placeholder="Have you had any previous experience? If so, state any" required></textarea>
@@ -133,9 +130,6 @@ async function init() {
   appPage.style.display = "block";
 
   document.getElementById("username").innerText = user.username;
-
-  // ✅ Fill Discord ID automatically
-  document.getElementById("discordField").value = user.id;
 
   const form = document.getElementById("applicationForm");
 
