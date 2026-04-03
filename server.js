@@ -101,6 +101,7 @@ app.get("/logout", (req, res) => {
 });
 
 // ===== SUBMIT =====
+console.log("SUBMIT ROUTE HIT");
 app.post("/submit", async (req, res) => {
   try {
     const user = req.session.user;
