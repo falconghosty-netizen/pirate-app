@@ -1,4 +1,4 @@
-const client = require("./bot");
+const client = require("./bot"); // MUST export client from bot.js
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -119,11 +119,19 @@ app.post("/submit", async (req, res) => {
 
     console.log("Form data:", req.body);
 
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+    // 🔥 SAFETY CHECK (important fix)
+    if (!client || !client.isReady()) {
+      console.log("Bot client not ready");
+      return res.status(500).send("Bot not ready");
+    }
+
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID).catch(err => {
+      console.error("Channel fetch failed:", err);
+      return null;
+    });
 
     if (!channel) {
-      console.log("Channel not found");
-      return res.status(500).send("Channel not found");
+      return res.status(500).send("Channel not found or inaccessible");
     }
 
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
@@ -164,7 +172,7 @@ app.post("/submit", async (req, res) => {
 
   } catch (err) {
     console.error("SUBMIT ERROR:", err);
-    res.status(500).send("Error submitting");
+    res.status(500).send(err.message || "Error submitting");
   }
 });
 
