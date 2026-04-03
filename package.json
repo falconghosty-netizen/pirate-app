@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/falconghosty-netizen/pirate-apps#readme",
   "dependencies": {
+    "discord.js": "^14.15.3",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
