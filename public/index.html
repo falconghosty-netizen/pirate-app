@@ -92,7 +92,16 @@
     <hr>
 
     <form id="applicationForm">
-      <input name="ign" placeholder="Minecraft IGN" required>
+      <input name="ign" id="ign" placeholder="Minecraft IGN" required>
+
+      <!-- ✅ Discord username auto-filled -->
+      <input 
+        name="discordName" 
+        id="discordName" 
+        placeholder="Discord Username"
+        readonly
+        required
+      >
 
       <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
 
@@ -125,12 +134,24 @@ async function init() {
     return;
   }
 
-  // Show app page
   loginPage.style.display = "none";
   appPage.style.display = "block";
 
-  // ✅ Show Discord username (or tag)
-  document.getElementById("username").innerText = `${user.username}#${user.discriminator}`;
+  // Display username at top
+  let displayName = "Unknown User";
+
+  if (user.global_name) {
+    displayName = user.global_name;
+  } else if (user.username && user.discriminator && user.discriminator !== "0") {
+    displayName = `${user.username}#${user.discriminator}`;
+  } else if (user.username) {
+    displayName = user.username;
+  }
+
+  document.getElementById("username").innerText = displayName;
+
+  // ✅ Auto-fill Discord input box
+  document.getElementById("discordName").value = displayName;
 
   const form = document.getElementById("applicationForm");
 
