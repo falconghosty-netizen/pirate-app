@@ -1,63 +1,66 @@
 const {
   Client,
   GatewayIntentBits,
+  Events,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Events,
   EmbedBuilder
 } = require("discord.js");
 
 require("dotenv").config();
 
-// ✅ CREATE CLIENT (this was missing)
+// ===== CLIENT =====
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+  intents: [
+    GatewayIntentBits.Guilds
+  ]
 });
 
-// ✅ BOT READY
+// ===== READY =====
 client.once(Events.ClientReady, () => {
   console.log(`Bot logged in as ${client.user.tag}`);
 });
 
-// ✅ BUTTON HANDLER
+// ===== BUTTON HANDLER =====
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isButton()) return;
 
   try {
+    const originalEmbed = interaction.message.embeds[0];
+    if (!originalEmbed) return;
+
     let status = "";
     let color = 0x5865F2;
 
     if (interaction.customId === "accept") {
       status = "✅ ACCEPTED";
       color = 0x57F287;
-    }
-
-    if (interaction.customId === "deny") {
+    } else if (interaction.customId === "deny") {
       status = "❌ DENIED";
       color = 0xED4245;
+    } else {
+      return;
     }
 
-    const originalEmbed = interaction.message.embeds[0];
-
-    // Get Discord ID
-    const discordField = originalEmbed.fields.find(f => f.name === "Discord ID");
-    const discordId = discordField?.value;
-
+    // Update embed
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
       .setColor(color)
-      .setFooter({ text: `Status: ${status} by ${interaction.user.username}` });
+      .setFooter({
+        text: `Status: ${status} by ${interaction.user.username}`
+      });
 
+    // Disable buttons
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("accept")
-        .setLabel("Accepted")
+        .setLabel("Accept")
         .setStyle(ButtonStyle.Success)
         .setDisabled(true),
 
       new ButtonBuilder()
         .setCustomId("deny")
-        .setLabel("Denied")
+        .setLabel("Deny")
         .setStyle(ButtonStyle.Danger)
         .setDisabled(true)
     );
@@ -67,23 +70,23 @@ client.on(Events.InteractionCreate, async (interaction) => {
       components: [row]
     });
 
-    // 🎭 ROLE ONLY
-    if (interaction.customId === "accept" && discordId && discordId !== "N/A") {
-      try {
-        const member = await interaction.guild.members.fetch(discordId);
-        await member.roles.add(process.env.ROLE_ID);
-      } catch (err) {
-        console.error("Role assignment failed:", err);
-      }
+    // 🚫 No role assignment anymore (since no Discord ID)
+
+    if (interaction.customId === "accept") {
+      console.log("Application accepted (no role assigned due to missing Discord ID).");
     }
 
   } catch (err) {
-    console.error(err);
-    await interaction.reply({ content: "Error handling button", ephemeral: true });
+    console.error("Interaction error:", err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: "Error handling this interaction.",
+        ephemeral: true
+      });
+    }
   }
 });
 
-// ✅ LOGIN (must be last)
+// ===== LOGIN =====
 client.login(process.env.BOT_TOKEN);
-
-module.exports = client;
