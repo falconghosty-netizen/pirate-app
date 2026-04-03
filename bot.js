@@ -47,7 +47,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
       .setColor(color)
       .setFooter({
-        text: `Status: ${status} by ${interaction.user.username}`
+        text: `Status: ${status} by ${interaction.user.tag}`
       });
 
     // Disable buttons
@@ -70,10 +70,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       components: [row]
     });
 
-    // 🚫 No role assignment anymore (since no Discord ID)
-
     if (interaction.customId === "accept") {
-      console.log("Application accepted (no role assigned due to missing Discord ID).");
+      console.log("Application accepted.");
+    } else {
+      console.log("Application denied.");
     }
 
   } catch (err) {

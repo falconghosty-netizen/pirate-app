@@ -131,7 +131,7 @@ app.post("/submit", async (req, res) => {
         },
         {
           name: "Discord",
-          value: `${user.username}#${user.discriminator}`,
+          value: user.tag,
           inline: false
         },
         {
@@ -176,6 +176,7 @@ app.post("/submit", async (req, res) => {
     res.status(500).send("Error submitting");
   }
 });
+
 // ===== START SERVER =====
 const PORT = process.env.PORT || 3000;
 
