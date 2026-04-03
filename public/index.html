@@ -129,7 +129,8 @@ async function init() {
   loginPage.style.display = "none";
   appPage.style.display = "block";
 
-  document.getElementById("username").innerText = user.username;
+  // ✅ Show Discord username (or tag)
+  document.getElementById("username").innerText = `${user.username}#${user.discriminator}`;
 
   const form = document.getElementById("applicationForm");
 
