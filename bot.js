@@ -90,3 +90,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // ===== LOGIN =====
 client.login(process.env.BOT_TOKEN);
+module.exports = client;
