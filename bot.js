@@ -5,6 +5,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
+// When bot starts
 client.once(Events.ClientReady, () => {
   console.log(`Bot logged in as ${client.user.tag}`);
 });
@@ -22,6 +23,8 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
+
+// 👇 THIS MUST BE AT THE VERY BOTTOM
 client.login(process.env.BOT_TOKEN);
 
 module.exports = client;
