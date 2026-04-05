@@ -1,3 +1,4 @@
+const submittedUsers = new Set();
 const client = require("./bot"); // MUST export client from bot.js
 const express = require("express");
 const session = require("express-session");
@@ -101,13 +102,15 @@ app.get("/logout", (req, res) => {
 // ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
-    console.log("SUBMIT ROUTE HIT");
-
     const user = req.session.user;
 
     if (!user) {
-      console.log("User not logged in");
       return res.status(401).json({ error: "Not logged in with Discord" });
+    }
+
+    // 🚫 BLOCK DUPLICATES
+    if (submittedUsers.has(user.id)) {
+      return res.status(400).send("You have already submitted an application.");
     }
 
     const {
@@ -117,22 +120,7 @@ app.post("/submit", async (req, res) => {
       contribution
     } = req.body;
 
-    console.log("Form data:", req.body);
-
-    // 🔥 SAFETY CHECK (important fix)
-    if (!client || !client.isReady()) {
-      console.log("Bot client not ready");
-      return res.status(500).send("Bot not ready");
-    }
-
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID).catch(err => {
-      console.error("Channel fetch failed:", err);
-      return null;
-    });
-
-    if (!channel) {
-      return res.status(500).send("Channel not found or inaccessible");
-    }
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
 
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
@@ -140,25 +128,16 @@ app.post("/submit", async (req, res) => {
       .setTitle("📥 New Application")
       .setColor(0x5865F2)
       .addFields(
-        { name: "Minecraft IGN", value: ign || "N/A", inline: false },
-        { name: "Discord Username", value: user.username || "N/A", inline: false },
-        { name: "Discord ID", value: user.id || "N/A", inline: false },
-        { name: "Plans", value: plans || "N/A", inline: false },
-        { name: "Experience", value: experience || "N/A", inline: false },
-        { name: "Contribution", value: contribution || "N/A", inline: false }
-      )
-      .setTimestamp();
+        { name: "Minecraft IGN", value: ign || "N/A" },
+        { name: "Discord", value: user.username || "N/A" },
+        { name: "Plans", value: plans || "N/A" },
+        { name: "Experience", value: experience || "N/A" },
+        { name: "Contribution", value: contribution || "N/A" }
+      );
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("accept")
-        .setLabel("Accept")
-        .setStyle(ButtonStyle.Success),
-
-      new ButtonBuilder()
-        .setCustomId("deny")
-        .setLabel("Deny")
-        .setStyle(ButtonStyle.Danger)
+      new ButtonBuilder().setCustomId("accept").setLabel("Accept").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("deny").setLabel("Deny").setStyle(ButtonStyle.Danger)
     );
 
     await channel.send({
@@ -166,13 +145,14 @@ app.post("/submit", async (req, res) => {
       components: [row]
     });
 
-    console.log("Submission sent to Discord");
+    // ✅ SAVE USER AFTER SUCCESS
+    submittedUsers.add(user.id);
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error("SUBMIT ERROR:", err);
-    res.status(500).send(err.message || "Error submitting");
+    console.error(err);
+    res.status(500).send("Error submitting");
   }
 });
 
