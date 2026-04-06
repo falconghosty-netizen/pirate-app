@@ -108,10 +108,10 @@ app.post("/submit", async (req, res) => {
       return res.status(401).json({ error: "Not logged in with Discord" });
     }
 
-    // Block duplicates
-    if (submittedUsers.has(user.id)) {
-      return res.status(400).send("You have already submitted an application.");
-    }
+    // Block duplicates (disabled for now)
+    // if (submittedUsers.has(user.id)) {
+    //   return res.status(400).send("You have already submitted an application.");
+    // }
 
     const { ign, plans, experience, contribution } = req.body;
 
@@ -143,8 +143,8 @@ app.post("/submit", async (req, res) => {
       components: [row]
     });
 
-    // Save user after success
-    submittedUsers.add(user.id);
+    // Save user after success (disabled for now)
+    // submittedUsers.add(user.id);
 
     res.json({ success: true });
 
