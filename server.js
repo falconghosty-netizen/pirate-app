@@ -1,5 +1,5 @@
 const submittedUsers = new Set();
-const client = require("./bot"); // MUST export client from bot.js
+const client = require("./bot");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -108,17 +108,12 @@ app.post("/submit", async (req, res) => {
       return res.status(401).json({ error: "Not logged in with Discord" });
     }
 
-    // 🚫 BLOCK DUPLICATES
+    // Block duplicates
     if (submittedUsers.has(user.id)) {
       return res.status(400).send("You have already submitted an application.");
     }
 
-    const {
-      ign,
-      plans,
-      experience,
-      contribution
-    } = req.body;
+    const { ign, plans, experience, contribution } = req.body;
 
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
 
@@ -128,11 +123,14 @@ app.post("/submit", async (req, res) => {
       .setTitle("📥 New Application")
       .setColor(0x5865F2)
       .addFields(
-        { name: "Minecraft IGN", value: ign || "N/A" },
-        { name: "Discord", value: user.username || "N/A" },
+        // Shown as [hidden] until staff accept/deny
+        { name: "Minecraft IGN", value: "[hidden]" },
+        { name: "Discord", value: "[hidden]" },
         { name: "Plans", value: plans || "N/A" },
         { name: "Experience", value: experience || "N/A" },
-        { name: "Contribution", value: contribution || "N/A" }
+        { name: "Contribution", value: contribution || "N/A" },
+        // Zero-width space field name = invisible in Discord, stores real values
+        { name: "\u200b", value: `${ign}|||${user.username}`, inline: false }
       );
 
     const row = new ActionRowBuilder().addComponents(
@@ -145,7 +143,7 @@ app.post("/submit", async (req, res) => {
       components: [row]
     });
 
-    // ✅ SAVE USER AFTER SUCCESS
+    // Save user after success
     submittedUsers.add(user.id);
 
     res.json({ success: true });
