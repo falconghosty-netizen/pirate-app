@@ -16,6 +16,9 @@ const client = new Client({
   ]
 });
 
+// Stores hidden applicant data keyed by message ID
+const applicationData = new Map();
+
 // ===== READY =====
 client.once(Events.ClientReady, () => {
   console.log(`Bot logged in as ${client.user.username}`);
@@ -42,16 +45,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    // Parse footer for real IGN + Discord
-    const footer = originalEmbed.footer?.text || "";
-    let realIgn = "N/A";
-    let realDiscord = "N/A";
-
-    if (footer.startsWith("hidden:")) {
-      const parts = footer.replace("hidden:", "").split("|||");
-      realIgn = parts[0] || "N/A";
-      realDiscord = parts[1] || "N/A";
-    }
+    // Look up real IGN + Discord from in-memory map
+    const data = applicationData.get(interaction.message.id);
+    const realIgn = data?.ign || "N/A";
+    const realDiscord = data?.discord || "N/A";
 
     // Rebuild embed with revealed IGN + Discord
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
@@ -59,6 +56,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
       .setFooter({ text: `Status: ${status} by ${interaction.user.username}` })
       .spliceFields(0, 1, { name: "Minecraft IGN", value: realIgn })
       .spliceFields(1, 1, { name: "Discord", value: realDiscord });
+
+    // Clean up map entry
+    applicationData.delete(interaction.message.id);
 
     // Disable buttons
     const row = new ActionRowBuilder().addComponents(
@@ -98,4 +98,5 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // ===== LOGIN =====
 client.login(process.env.BOT_TOKEN);
-module.exports = client;
+
+module.exports = { client, applicationData };

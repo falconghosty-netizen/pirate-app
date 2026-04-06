@@ -1,5 +1,4 @@
-const submittedUsers = new Set();
-const client = require("./bot");
+const { client, applicationData } = require("./bot");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -108,11 +107,6 @@ app.post("/submit", async (req, res) => {
       return res.status(401).json({ error: "Not logged in with Discord" });
     }
 
-    // Block duplicates (disabled for now)
-    // if (submittedUsers.has(user.id)) {
-    //   return res.status(400).send("You have already submitted an application.");
-    // }
-
     const { ign, plans, experience, contribution } = req.body;
 
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
@@ -128,21 +122,20 @@ app.post("/submit", async (req, res) => {
         { name: "Plans", value: plans || "N/A" },
         { name: "Experience", value: experience || "N/A" },
         { name: "Contribution", value: contribution || "N/A" }
-      )
-      .setFooter({ text: `hidden:${ign}|||${user.username}` });
+      );
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId("accept").setLabel("Accept").setStyle(ButtonStyle.Success),
       new ButtonBuilder().setCustomId("deny").setLabel("Deny").setStyle(ButtonStyle.Danger)
     );
 
-    await channel.send({
+    const message = await channel.send({
       embeds: [embed],
       components: [row]
     });
 
-    // Save user after success (disabled for now)
-    // submittedUsers.add(user.id);
+    // Store real IGN + Discord keyed by message ID (never shown in embed)
+    applicationData.set(message.id, { ign: ign || "N/A", discord: user.username || "N/A" });
 
     res.json({ success: true });
 
