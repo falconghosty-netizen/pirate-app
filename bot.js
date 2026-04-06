@@ -42,24 +42,23 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    // Parse hidden field (zero-width space name) for real IGN + Discord
-    const hiddenField = originalEmbed.fields.find(f => f.name === "\u200b");
+    // Parse footer for real IGN + Discord
+    const footer = originalEmbed.footer?.text || "";
     let realIgn = "N/A";
     let realDiscord = "N/A";
 
-    if (hiddenField) {
-      const parts = hiddenField.value.split("|||");
+    if (footer.startsWith("hidden:")) {
+      const parts = footer.replace("hidden:", "").split("|||");
       realIgn = parts[0] || "N/A";
       realDiscord = parts[1] || "N/A";
     }
 
-    // Rebuild embed with revealed IGN + Discord, drop the hidden field
+    // Rebuild embed with revealed IGN + Discord
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
       .setColor(color)
       .setFooter({ text: `Status: ${status} by ${interaction.user.username}` })
       .spliceFields(0, 1, { name: "Minecraft IGN", value: realIgn })
-      .spliceFields(1, 1, { name: "Discord", value: realDiscord })
-      .spliceFields(5, 1); // remove the hidden storage field
+      .spliceFields(1, 1, { name: "Discord", value: realDiscord });
 
     // Disable buttons
     const row = new ActionRowBuilder().addComponents(

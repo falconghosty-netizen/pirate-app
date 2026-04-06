@@ -123,15 +123,13 @@ app.post("/submit", async (req, res) => {
       .setTitle("📥 New Application")
       .setColor(0x5865F2)
       .addFields(
-        // Shown as [hidden] until staff accept/deny
         { name: "Minecraft IGN", value: "[hidden]" },
         { name: "Discord", value: "[hidden]" },
         { name: "Plans", value: plans || "N/A" },
         { name: "Experience", value: experience || "N/A" },
-        { name: "Contribution", value: contribution || "N/A" },
-        // Zero-width space field name = invisible in Discord, stores real values
-        { name: "\u200b", value: `${ign}|||${user.username}`, inline: false }
-      );
+        { name: "Contribution", value: contribution || "N/A" }
+      )
+      .setFooter({ text: `hidden:${ign}|||${user.username}` });
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId("accept").setLabel("Accept").setStyle(ButtonStyle.Success),
