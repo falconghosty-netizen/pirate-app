@@ -9,10 +9,13 @@ const {
 } = require("discord.js");
 require("dotenv").config();
 
+const ROLE_ID = "1490830950697930892";
+
 // ===== CLIENT =====
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers
   ]
 });
 
@@ -80,6 +83,23 @@ client.on(Events.InteractionCreate, async (interaction) => {
     });
 
     if (interaction.customId === "accept") {
+      // Fetch all members and find by username
+      await interaction.guild.members.fetch();
+      const member = interaction.guild.members.cache.find(
+        (m) => m.user.username === realDiscord || m.user.tag === realDiscord
+      );
+
+      if (member) {
+        try {
+          await member.roles.add(ROLE_ID);
+          console.log(`Role assigned to ${member.user.tag}`);
+        } catch (err) {
+          console.error("Failed to assign role:", err);
+        }
+      } else {
+        console.warn(`Could not find member with Discord name: ${realDiscord}`);
+      }
+
       console.log(`Application accepted. IGN: ${realIgn} | Discord: ${realDiscord}`);
     } else {
       console.log(`Application denied. IGN: ${realIgn} | Discord: ${realDiscord}`);
