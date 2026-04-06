@@ -67,6 +67,18 @@
       display: none;
       margin-top: 20px;
     }
+
+    .char-counter {
+      text-align: right;
+      font-size: 11px;
+      color: #888;
+      margin-top: -6px;
+      margin-bottom: 4px;
+    }
+
+    .char-counter.over {
+      color: #e74c3c;
+    }
   </style>
 </head>
 
@@ -102,11 +114,32 @@
         required
       >
 
+      <textarea name="about" placeholder="Tell us about yourself!" required></textarea>
+
       <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
 
-      <textarea name="experience" placeholder="Have you had any previous experience? If so, state any" required></textarea>
+      <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
 
-      <textarea name="contribution" placeholder="What will you contribute to this event?" required></textarea>
+      <textarea name="whyYou" placeholder="Why should we accept you over someone else?" required></textarea>
+
+      <textarea name="pirateMeaning" id="pirateMeaning" placeholder="What is a pirate to you?" maxlength="100" required></textarea>
+      <div class="char-counter" id="pirateMeaningCounter">0 / 100</div>
+
+      <textarea name="appleQuestion" id="appleQuestion" placeholder="If john has 3 apples and he eats a yellow whats the smell of the sun?" maxlength="100" required></textarea>
+      <div class="char-counter" id="appleQuestionCounter">0 / 100</div>
+
+      <hr>
+      <p style="font-size: 13px; color: #aaa; text-align: left;">
+        <b>Rp questions!</b> Reply to these in the character you plan on doing in the event (Ofc you can change your mind on the character later on, but not on the answers so reply carefully!)
+      </p>
+
+      <textarea name="rp1" placeholder="You and your crew find yourself stuck on a boat with scarce resources and no way to reach land, what do you do?" required></textarea>
+
+      <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
+
+      <textarea name="rp3" placeholder="After a long day you go to sleep, but start hearing your crew talking about you near the deck, what do you do?" required></textarea>
+
+      <textarea name="characterBio" placeholder="Tell us about your character! Anything that you think would be relevant to his story. We will be keeping close watch tho those we find intriguing!" required></textarea>
 
       <button type="submit">Submit Application</button>
     </form>
@@ -148,6 +181,24 @@ async function init() {
 
   document.getElementById("username").innerText = displayName;
   document.getElementById("discordName").value = displayName;
+
+  // Character counters
+  const pirateMeaning = document.getElementById("pirateMeaning");
+  const pirateMeaningCounter = document.getElementById("pirateMeaningCounter");
+  const appleQuestion = document.getElementById("appleQuestion");
+  const appleQuestionCounter = document.getElementById("appleQuestionCounter");
+
+  pirateMeaning.addEventListener("input", () => {
+    const len = pirateMeaning.value.length;
+    pirateMeaningCounter.textContent = `${len} / 100`;
+    pirateMeaningCounter.classList.toggle("over", len >= 100);
+  });
+
+  appleQuestion.addEventListener("input", () => {
+    const len = appleQuestion.value.length;
+    appleQuestionCounter.textContent = `${len} / 100`;
+    appleQuestionCounter.classList.toggle("over", len >= 100);
+  });
 
   const form = document.getElementById("applicationForm");
 

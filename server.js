@@ -53,9 +53,7 @@ app.get("/callback", async (req, res) => {
   try {
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
@@ -68,17 +66,13 @@ app.get("/callback", async (req, res) => {
     const tokenData = await tokenRes.json();
 
     const userRes = await fetch("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`
-      }
+      headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
 
     const user = await userRes.json();
-
     req.session.user = user;
 
     console.log("Logged in user:", user.username);
-
     res.redirect("/");
   } catch (err) {
     console.error("OAuth error:", err);
@@ -98,6 +92,12 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Helper to truncate long answers for Discord embed (field limit: 1024 chars)
+function truncate(str, max = 1024) {
+  if (!str) return "N/A";
+  return str.length > max ? str.slice(0, max - 3) + "..." : str;
+}
+
 // ===== SUBMIT =====
 app.post("/submit", async (req, res) => {
   try {
@@ -107,7 +107,19 @@ app.post("/submit", async (req, res) => {
       return res.status(401).json({ error: "Not logged in with Discord" });
     }
 
-    const { ign, plans, experience, contribution } = req.body;
+    const {
+      ign,
+      about,
+      plans,
+      experience,
+      whyYou,
+      pirateMeaning,
+      appleQuestion,
+      rp1,
+      rp2,
+      rp3,
+      characterBio
+    } = req.body;
 
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
 
@@ -119,9 +131,16 @@ app.post("/submit", async (req, res) => {
       .addFields(
         { name: "Minecraft IGN", value: "[hidden]" },
         { name: "Discord", value: "[hidden]" },
-        { name: "Plans", value: plans || "N/A" },
-        { name: "Experience", value: experience || "N/A" },
-        { name: "Contribution", value: contribution || "N/A" }
+        { name: "About", value: truncate(about) },
+        { name: "Plans", value: truncate(plans) },
+        { name: "Experience", value: truncate(experience) },
+        { name: "Why them?", value: truncate(whyYou) },
+        { name: "What is a pirate to you?", value: truncate(pirateMeaning) },
+        { name: "Apple question", value: truncate(appleQuestion) },
+        { name: "RP — Stranded", value: truncate(rp1) },
+        { name: "RP — Throw friend?", value: truncate(rp2) },
+        { name: "RP — Crew talking", value: truncate(rp3) },
+        { name: "Character bio", value: truncate(characterBio) }
       );
 
     const row = new ActionRowBuilder().addComponents(
