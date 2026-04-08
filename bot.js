@@ -9,8 +9,6 @@ const {
 } = require("discord.js");
 require("dotenv").config();
 
-const ROLE_ID = "1490830950697930892";
-
 // ===== CLIENT =====
 const client = new Client({
   intents: [
@@ -52,6 +50,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const data = applicationData.get(interaction.message.id);
     const realIgn = data?.ign || "N/A";
     const realDiscord = data?.discord || "N/A";
+    const userId = data?.userId;
 
     // Rebuild embed with revealed IGN + Discord
     const updatedEmbed = EmbedBuilder.from(originalEmbed)
@@ -82,24 +81,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
       components: [row]
     });
 
-    if (interaction.customId === "accept") {
-      // Fetch all members and find by username
-      await interaction.guild.members.fetch();
-      const member = interaction.guild.members.cache.find(
-        (m) => m.user.username === realDiscord || m.user.tag === realDiscord
-      );
-
-      if (member) {
-        try {
-          await member.roles.add(ROLE_ID);
-          console.log(`Role assigned to ${member.user.tag}`);
-        } catch (err) {
-          console.error("Failed to assign role:", err);
-        }
-      } else {
-        console.warn(`Could not find member with Discord name: ${realDiscord}`);
+    // Assign role on accept
+    if (interaction.customId === "accept" && userId) {
+      try {
+        const guild = interaction.guild;
+        const member = await guild.members.fetch(userId);
+        await member.roles.add("1490830950697930892");
+        console.log(`Role assigned to ${realDiscord} (${userId})`);
+      } catch (roleErr) {
+        console.error("Failed to assign role:", roleErr);
       }
+    }
 
+    if (interaction.customId === "accept") {
       console.log(`Application accepted. IGN: ${realIgn} | Discord: ${realDiscord}`);
     } else {
       console.log(`Application denied. IGN: ${realIgn} | Discord: ${realDiscord}`);

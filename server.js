@@ -153,8 +153,12 @@ app.post("/submit", async (req, res) => {
       components: [row]
     });
 
-    // Store real IGN + Discord keyed by message ID (never shown in embed)
-    applicationData.set(message.id, { ign: ign || "N/A", discord: user.username || "N/A" });
+    // Store real IGN, Discord, and userId keyed by message ID
+    applicationData.set(message.id, {
+      ign: ign || "N/A",
+      discord: user.username || "N/A",
+      userId: user.id
+    });
 
     res.json({ success: true });
 
