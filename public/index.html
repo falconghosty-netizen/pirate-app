@@ -137,6 +137,26 @@
       font-size: 13px;
       color: #aaa;
     }
+    .discord-badge {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      opacity: 0.9;
+    }
+
+    .discord-badge:hover {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+
+    .discord-badge img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 
@@ -286,6 +306,10 @@ async function init() {
 
 init();
 </script>
+
+<a href="https://discord.gg/rkBmwu7KkC" target="_blank" class="discord-badge">
+  <img src="https://cdn.discordapp.com/attachments/1407903627791831090/1487803017016381600/71c2ee19-0056-447b-8012-10d5a6868f96.png?ex=69da4a09&is=69d8f889&hm=2a96a52bdd2b382ceaeb13f130a12fcd8c0ce31968a96b712f79b38ece61e782&" alt="Join Discord">
+</a>
 
 </body>
 </html>
