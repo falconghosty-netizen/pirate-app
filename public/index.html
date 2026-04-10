@@ -137,6 +137,55 @@
       font-size: 13px;
       color: #aaa;
     }
+    @keyframes typewriter {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: transparent; }
+      50% { border-color: #5865F2; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .typewriter {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid #5865F2;
+      animation: typewriter 1.8s steps(36) forwards, blink 0.75s step-end 1.8s 4;
+      max-width: 100%;
+    }
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .field-group {
+      text-align: left;
+      margin: 10px 0 4px 0;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9aa0f5;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .field-group input,
+    .field-group textarea {
+      margin: 0;
+    }
+
     .discord-badge {
       position: fixed;
       bottom: 20px;
@@ -166,9 +215,9 @@
 
   <!-- LOGIN PAGE -->
   <div id="loginPage">
-    <h1>150 Player Pirate Civilization Event</h1>
-    <p>Please login with Discord to continue</p>
-    <a href="/login"><button>Login with Discord</button></a>
+    <h1><span class="typewriter">150 Player Pirate Civilization Event</span></h1>
+    <p class="fade-in" style="animation-delay: 2s;">Please login with Discord to continue</p>
+    <div class="fade-in" style="animation-delay: 2.3s;"><a href="/login"><button>Login with Discord</button></a></div>
   </div>
 
   <!-- APPLICATION PAGE -->
@@ -182,41 +231,71 @@
     <hr>
 
     <form id="applicationForm">
-      <input name="ign" id="ign" placeholder="Minecraft IGN" required>
+      <div class="field-group">
+        <label>Minecraft IGN</label>
+        <input name="ign" id="ign" placeholder="Your in-game name" required>
+      </div>
 
-      <input 
-        name="discordName" 
-        id="discordName" 
-        placeholder="Discord Username"
-        readonly
-        required
-      >
+      <div class="field-group">
+        <label>Discord Username</label>
+        <input name="discordName" id="discordName" placeholder="Discord Username" readonly required>
+      </div>
 
-      <textarea name="about" placeholder="Tell us about yourself!" required></textarea>
+      <div class="field-group">
+        <label>About You</label>
+        <textarea name="about" placeholder="Tell us about yourself!" required></textarea>
+      </div>
 
-      <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
+      <div class="field-group">
+        <label>Your Plans</label>
+        <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
+      </div>
 
-      <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
+      <div class="field-group">
+        <label>Previous Experience</label>
+        <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
+      </div>
 
-      <textarea name="whyYou" placeholder="Why should we accept you over someone else?" required></textarea>
+      <div class="field-group">
+        <label>Why You?</label>
+        <textarea name="whyYou" placeholder="Why should we accept you over someone else?" required></textarea>
+      </div>
 
-      <textarea name="pirateMeaning" id="pirateMeaning" placeholder="What is a pirate to you?" maxlength="100" required></textarea>
-      <div class="char-counter" id="pirateMeaningCounter">0 / 100</div>
+      <div class="field-group">
+        <label>What is a pirate to you?</label>
+        <textarea name="pirateMeaning" id="pirateMeaning" placeholder="Your answer..." maxlength="100" required></textarea>
+        <div class="char-counter" id="pirateMeaningCounter">0 / 100</div>
+      </div>
 
-      <textarea name="appleQuestion" id="appleQuestion" placeholder="If john has 3 apples and he eats a yellow whats the smell of the sun?" maxlength="100" required></textarea>
-      <div class="char-counter" id="appleQuestionCounter">0 / 100</div>
+      <div class="field-group">
+        <label>If john has 3 apples and he eats a yellow whats the smell of the sun?</label>
+        <textarea name="appleQuestion" id="appleQuestion" placeholder="Your answer..." maxlength="100" required></textarea>
+        <div class="char-counter" id="appleQuestionCounter">0 / 100</div>
+      </div>
 
       <hr>
       <div class="section-card">
         <p><b>Rp questions!</b> Reply to these in the character you plan on doing in the event (Ofc you can change your mind on the character later on, but not on the answers so reply carefully!)</p>
 
-        <textarea name="rp1" placeholder="You and your crew find yourself stuck on a boat with scarce resources and no way to reach land, what do you do?" required></textarea>
+        <div class="field-group">
+          <label>Scarce Resources</label>
+          <textarea name="rp1" placeholder="You and your crew find yourself stuck on a boat with scarce resources and no way to reach land, what do you do?" required></textarea>
+        </div>
 
-        <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
+        <div class="field-group">
+          <label>The Traitor</label>
+          <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
+        </div>
 
-        <textarea name="rp3" placeholder="After a long day you go to sleep, but start hearing your crew talking about you near the deck, what do you do?" required></textarea>
+        <div class="field-group">
+          <label>Overheard</label>
+          <textarea name="rp3" placeholder="After a long day you go to sleep, but start hearing your crew talking about you near the deck, what do you do?" required></textarea>
+        </div>
 
-        <textarea name="characterBio" placeholder="Tell us about your character! Anything that you think would be relevant to his story. We will be keeping close watch tho those we find intriguing!" required></textarea>
+        <div class="field-group">
+          <label>Character Bio</label>
+          <textarea name="characterBio" placeholder="Tell us about your character! Anything that you think would be relevant to his story. We will be keeping close watch tho those we find intriguing!" required></textarea>
+        </div>
       </div>
 
       <button type="submit">Submit Application</button>
