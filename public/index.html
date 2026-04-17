@@ -336,45 +336,13 @@
         <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
       </div>
 
-      <div class="field-group">
-        <label>Why You?</label>
-        <textarea name="whyYou" placeholder="Why should we accept you over someone else?" required></textarea>
-      </div>
-
-      <div class="field-group">
-        <label>What is a pirate to you?</label>
-        <textarea name="pirateMeaning" id="pirateMeaning" placeholder="Your answer..." maxlength="100" required></textarea>
-        <div class="char-counter" id="pirateMeaningCounter">0 / 100</div>
-      </div>
-
-      <div class="field-group">
-        <label>If john has 3 apples and he eats a yellow whats the smell of the sun?</label>
-        <textarea name="appleQuestion" id="appleQuestion" placeholder="Your answer..." maxlength="100" required></textarea>
-        <div class="char-counter" id="appleQuestionCounter">0 / 100</div>
-      </div>
-
       <hr>
       <div class="section-card">
-        <p><b>Roleplay Questions!</b> Reply to these in the character you plan on doing in the event (Ofc you can change your mind on the character later on, but not on the answers so reply carefully!)</p>
-
-        <div class="field-group">
-          <label>Scarce Resources</label>
-          <textarea name="rp1" placeholder="You and your crew find yourself stuck on a boat with scarce resources and no way to reach land, what do you do?" required></textarea>
-        </div>
+        <p><b>Roleplay Question!</b> Reply in the character you plan on playing in the event.</p>
 
         <div class="field-group">
           <label>The Traitor</label>
           <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
-        </div>
-
-        <div class="field-group">
-          <label>Overheard</label>
-          <textarea name="rp3" placeholder="After a long day you go to sleep, but start hearing your crew talking about you near the deck, what do you do?" required></textarea>
-        </div>
-
-        <div class="field-group">
-          <label>Character Bio</label>
-          <textarea name="characterBio" placeholder="Tell us about your character! Anything that you think would be relevant to his story. We will be keeping close watch tho those we find intriguing!" required></textarea>
         </div>
       </div>
 
@@ -436,24 +404,6 @@ async function init() {
 
   document.getElementById("username").innerText = displayName;
   document.getElementById("discordName").value = displayName;
-
-  // Character counters
-  const pirateMeaning = document.getElementById("pirateMeaning");
-  const pirateMeaningCounter = document.getElementById("pirateMeaningCounter");
-  const appleQuestion = document.getElementById("appleQuestion");
-  const appleQuestionCounter = document.getElementById("appleQuestionCounter");
-
-  pirateMeaning.addEventListener("input", () => {
-    const len = pirateMeaning.value.length;
-    pirateMeaningCounter.textContent = `${len} / 100`;
-    pirateMeaningCounter.classList.toggle("over", len >= 100);
-  });
-
-  appleQuestion.addEventListener("input", () => {
-    const len = appleQuestion.value.length;
-    appleQuestionCounter.textContent = `${len} / 100`;
-    appleQuestionCounter.classList.toggle("over", len >= 100);
-  });
 
   const form = document.getElementById("applicationForm");
 
