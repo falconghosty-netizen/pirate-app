@@ -368,12 +368,17 @@ function dismissSplash() {
   setTimeout(() => splash.remove(), 1400);
 }
 
-splashVideo.addEventListener("ended", dismissSplash);
-splashVideo.addEventListener("error", () => splash.remove());
-skipBtn.addEventListener("click", dismissSplash);
-
-// Fallback: force dismiss after 15s in case video hangs
-setTimeout(dismissSplash, 15000);
+// Only show splash once per browser session
+if (sessionStorage.getItem("splashSeen")) {
+  splash.remove();
+} else {
+  sessionStorage.setItem("splashSeen", "1");
+  splashVideo.addEventListener("ended", dismissSplash);
+  splashVideo.addEventListener("error", () => splash.remove());
+  skipBtn.addEventListener("click", dismissSplash);
+  // Fallback: force dismiss after 15s in case video hangs
+  setTimeout(dismissSplash, 15000);
+}
 
 // ===== MAIN =====
 async function init() {

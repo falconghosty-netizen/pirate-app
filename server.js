@@ -112,13 +112,7 @@ app.post("/submit", async (req, res) => {
       about,
       plans,
       experience,
-      whyYou,
-      pirateMeaning,
-      appleQuestion,
-      rp1,
-      rp2,
-      rp3,
-      characterBio
+      rp2
     } = req.body;
 
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
@@ -134,13 +128,7 @@ app.post("/submit", async (req, res) => {
         { name: "About", value: truncate(about) },
         { name: "Plans", value: truncate(plans) },
         { name: "Experience", value: truncate(experience) },
-        { name: "Why them?", value: truncate(whyYou) },
-        { name: "What is a pirate to you?", value: truncate(pirateMeaning) },
-        { name: "Apple question", value: truncate(appleQuestion) },
-        { name: "RP — Stranded", value: truncate(rp1) },
-        { name: "RP — Throw friend?", value: truncate(rp2) },
-        { name: "RP — Crew talking", value: truncate(rp3) },
-        { name: "Character bio", value: truncate(characterBio) }
+        { name: "RP — The Traitor", value: truncate(rp2) }
       );
 
     const row = new ActionRowBuilder().addComponents(
