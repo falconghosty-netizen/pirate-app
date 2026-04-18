@@ -349,9 +349,14 @@
       <button type="submit">Submit Application</button>
     </form>
 
-    <div id="thankYouMessage">
+    <div id="thankYouMessage" style="display:none;">
       <h2>Thank you for applying for Sarkovia Events!</h2>
       <p>You'll hear news about your application shortly.</p>
+    </div>
+
+    <div id="alreadyAppliedMessage" style="display:none;">
+      <h2>Already Applied</h2>
+      <p>You've already submitted an application with this Discord account. You can only apply once.</p>
     </div>
   </div>
 
@@ -424,6 +429,12 @@ async function init() {
       },
       body: JSON.stringify(data)
     });
+
+    if (res.status === 409) {
+      form.style.display = "none";
+      document.getElementById("alreadyAppliedMessage").style.display = "block";
+      return;
+    }
 
     if (!res.ok) {
       const text = await res.text();

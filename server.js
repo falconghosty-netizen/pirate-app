@@ -92,6 +92,9 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Tracks Discord user IDs that have already submitted
+const submittedUsers = new Set();
+
 // Helper to truncate long answers for Discord embed (field limit: 1024 chars)
 function truncate(str, max = 1024) {
   if (!str) return "N/A";
@@ -105,6 +108,10 @@ app.post("/submit", async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ error: "Not logged in with Discord" });
+    }
+
+    if (submittedUsers.has(user.id)) {
+      return res.status(409).json({ error: "You have already submitted an application." });
     }
 
     const {
@@ -140,6 +147,9 @@ app.post("/submit", async (req, res) => {
       embeds: [embed],
       components: [row]
     });
+
+    // Mark this Discord account as having submitted
+    submittedUsers.add(user.id);
 
     // Store real IGN, Discord, and userId keyed by message ID
     applicationData.set(message.id, {
