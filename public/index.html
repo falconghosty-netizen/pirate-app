@@ -81,30 +81,7 @@
       pointer-events: none;
     }
 
-    #skipBtn {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 13px;
-      font-family: Arial, sans-serif;
-      letter-spacing: 0.4px;
-      transition: background 0.2s ease;
-      width: auto;
-      margin: 0;
-      box-shadow: none;
-    }
 
-    #skipBtn:hover {
-      background: rgba(255,255,255,0.28);
-      transform: none;
-      box-shadow: none;
-    }
     /* ===== END SPLASH ===== */
 
     .container {
@@ -286,7 +263,7 @@
   <video id="splashVideo" autoplay muted playsinline>
     <source src="/intro.mp4" type="video/mp4">
   </video>
-  <button id="skipBtn">Skip</button>
+
 </div>
 
 <div class="bg-effects"></div>
@@ -366,7 +343,6 @@
 // ===== SPLASH =====
 const splash = document.getElementById("splash");
 const splashVideo = document.getElementById("splashVideo");
-const skipBtn = document.getElementById("skipBtn");
 
 function dismissSplash() {
   splash.classList.add("fade-out");
@@ -380,8 +356,7 @@ if (localStorage.getItem("splashSeen")) {
   localStorage.setItem("splashSeen", "1");
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => splash.remove());
-  skipBtn.addEventListener("click", dismissSplash);
-  // Fallback: force dismiss after 15s in case video hangs
+// Fallback: force dismiss after 15s in case video hangs
   setTimeout(dismissSplash, 15000);
 }
 
