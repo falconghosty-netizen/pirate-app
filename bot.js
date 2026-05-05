@@ -21,6 +21,10 @@ client.once(Events.ClientReady, async () => {
     new SlashCommandBuilder()
       .setName("sort")
       .setDescription("Sort all rated applications by average score and post results")
+      .toJSON(),
+    new SlashCommandBuilder()
+      .setName("clearapps")
+      .setDescription("Clear all stored applications from memory")
       .toJSON()
   ];
 
@@ -244,6 +248,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
     return;
   }
+
+  // ── /clearapps COMMAND ──
+  if (interaction.isChatInputCommand() && interaction.commandName === "clearapps") {
+    const count = applicationData.size;
+    applicationData.clear();
+    await interaction.reply({
+      content: `🗑️ Cleared **${count}** application${count !== 1 ? "s" : ""} from memory.`,
+      ephemeral: true
+    });
+    return;
+  }
+
 });
 
 // ===== LOGIN =====
