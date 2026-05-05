@@ -10,7 +10,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
 });
 
-// { ign, discord, userId, fields, scores: Map<staffId, score> }
+// { ign, discord, userId, fields, scores: Map<staffId, score>, messageId, channelId }
 const applicationData = new Map();
 
 // ===== READY =====
@@ -25,6 +25,10 @@ client.once(Events.ClientReady, async () => {
     new SlashCommandBuilder()
       .setName("clearapps")
       .setDescription("Clear all stored applications from memory")
+      .toJSON(),
+    new SlashCommandBuilder()
+      .setName("progress")
+      .setDescription("See which applications you have and haven't rated yet")
       .toJSON()
   ];
 
@@ -65,7 +69,10 @@ async function sendApplication({ ign, discord, userId, fields, channelId }) {
   await message.edit({ components: [row] });
 
   applicationData.set(message.id, {
-    ign, discord, userId, fields, scores: new Map()
+    ign, discord, userId, fields,
+    scores: new Map(),
+    messageId: message.id,
+    channelId
   });
 }
 
@@ -115,6 +122,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     const alreadyRated = data.scores.has(interaction.user.id);
     data.scores.set(interaction.user.id, score);
+
+    // Add a ✅ reaction to the message so staff can see at a glance it's been rated
+    // Remove old reaction first if re-rating isn't their first time
+    try {
+      const channel = await client.channels.fetch(data.channelId);
+      const message = await channel.messages.fetch(messageId);
+
+      if (!alreadyRated) {
+        await message.react("✅");
+      }
+    } catch (reactErr) {
+      console.error("Failed to react to message:", reactErr);
+    }
 
     await interaction.reply({
       content: alreadyRated
@@ -257,6 +277,55 @@ client.on(Events.InteractionCreate, async (interaction) => {
       content: `🗑️ Cleared **${count}** application${count !== 1 ? "s" : ""} from memory.`,
       ephemeral: true
     });
+    return;
+  }
+
+  // ── /progress COMMAND ──
+  if (interaction.isChatInputCommand() && interaction.commandName === "progress") {
+    if (!applicationData.size) {
+      await interaction.reply({ content: "No applications found.", ephemeral: true });
+      return;
+    }
+
+    const rated = [];
+    const unrated = [];
+
+    for (const [messageId, data] of applicationData.entries()) {
+      const score = data.scores.get(interaction.user.id);
+      const link = `https://discord.com/channels/${interaction.guildId}/${data.channelId}/${messageId}`;
+      if (score !== undefined) {
+        rated.push(`✅ [Application](${link}) — you gave **${score}/10**`);
+      } else {
+        unrated.push(`❌ [Application](${link}) — not rated yet`);
+      }
+    }
+
+    const total = applicationData.size;
+    const ratedCount = rated.length;
+
+    const lines = [
+      `**Your progress: ${ratedCount}/${total} rated**\n`,
+      ...unrated,
+      ...rated
+    ];
+
+    // Discord message limit safeguard — chunk if needed
+    const chunks = [];
+    let current = "";
+    for (const line of lines) {
+      if ((current + "\n" + line).length > 1900) {
+        chunks.push(current);
+        current = line;
+      } else {
+        current += (current ? "\n" : "") + line;
+      }
+    }
+    if (current) chunks.push(current);
+
+    await interaction.reply({ content: chunks[0], ephemeral: true });
+    for (let i = 1; i < chunks.length; i++) {
+      await interaction.followUp({ content: chunks[i], ephemeral: true });
+    }
     return;
   }
 
