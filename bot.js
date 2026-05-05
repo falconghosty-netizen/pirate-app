@@ -13,13 +13,14 @@ const client = new Client({
 // { ign, discord, userId, fields, scores: Map<staffId, score> }
 const applicationData = new Map();
 
+// ===== READY =====
 client.once(Events.ClientReady, async () => {
   console.log(`Bot logged in as ${client.user.username}`);
 
   const commands = [
     new SlashCommandBuilder()
       .setName("sort")
-      .setDescription("Sort all rated applications by average score")
+      .setDescription("Sort all rated applications by average score and post results")
       .toJSON()
   ];
 
@@ -35,6 +36,36 @@ client.once(Events.ClientReady, async () => {
   }
 });
 
+// ===== SEND APPLICATION (called from server.js) =====
+async function sendApplication({ ign, discord, userId, fields, channelId }) {
+  const channel = await client.channels.fetch(channelId);
+
+  const embed = new EmbedBuilder()
+    .setTitle("📥 New Application")
+    .setColor(0x5865F2)
+    .addFields(
+      { name: "Minecraft IGN", value: "[hidden]", inline: true },
+      { name: "Discord", value: "[hidden]", inline: true },
+      ...fields
+    );
+
+  const message = await channel.send({ embeds: [embed] });
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`rate_${message.id}`)
+      .setLabel("Rate")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  await message.edit({ components: [row] });
+
+  applicationData.set(message.id, {
+    ign, discord, userId, fields, scores: new Map()
+  });
+}
+
+// ===== INTERACTIONS =====
 client.on(Events.InteractionCreate, async (interaction) => {
 
   // ── RATE BUTTON ──
@@ -62,12 +93,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
   // ── RATE MODAL SUBMIT ──
   if (interaction.isModalSubmit() && interaction.customId.startsWith("rateModal_")) {
     const messageId = interaction.customId.replace("rateModal_", "");
-    const raw = interaction.fields.getTextInputValue("score");
-    const score = parseInt(raw);
+    const score = parseInt(interaction.fields.getTextInputValue("score"));
 
     if (isNaN(score) || score < 1 || score > 10) {
       await interaction.reply({
-        content: "Invalid score. Enter a number between 1 and 10.",
+        content: "Invalid score. Please enter a number between 1 and 10.",
         ephemeral: true
       });
       return;
@@ -79,7 +109,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    if (!data.scores) data.scores = new Map();
     const alreadyRated = data.scores.has(interaction.user.id);
     data.scores.set(interaction.user.id, score);
 
@@ -96,9 +125,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isButton() &&
     (interaction.customId.startsWith("accept_") || interaction.customId.startsWith("deny_"))) {
     try {
-      const parts = interaction.customId.split("_");
-      const action = parts[0];
-      const messageId = parts[1];
+      const [action, messageId] = interaction.customId.split("_");
       const originalEmbed = interaction.message.embeds[0];
       if (!originalEmbed) return;
 
@@ -141,6 +168,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
           console.error("Failed to assign role:", roleErr);
         }
       }
+
+      console.log(`Application ${action}ed. IGN: ${realIgn} | Discord: ${realDiscord}`);
     } catch (err) {
       console.error("Accept/Deny error:", err);
       if (!interaction.replied)
@@ -163,7 +192,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const sorted = [];
       for (const [messageId, data] of applicationData.entries()) {
-        const scores = data.scores ? [...data.scores.values()] : [];
+        const scores = [...data.scores.values()];
         const avg = scores.length
           ? scores.reduce((a, b) => a + b, 0) / scores.length
           : 0;
@@ -189,7 +218,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
               value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
               inline: true
             },
-            ...(data.fields || [])
+            ...data.fields
           );
 
         const row = new ActionRowBuilder().addComponents(
@@ -217,5 +246,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+// ===== LOGIN =====
 client.login(process.env.BOT_TOKEN);
-module.exports = { client, applicationData };
+module.exports = { client, applicationData, sendApplication };
