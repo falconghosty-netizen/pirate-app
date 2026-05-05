@@ -1,4 +1,4 @@
-const { client, applicationData } = require("./bot");
+const { sendApplication } = require("./bot");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -15,9 +15,7 @@ app.use(session({
   secret: "secret123",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: false
-  }
+  cookie: { secure: false }
 }));
 
 // ===== ENV =====
@@ -87,15 +85,10 @@ app.get("/user", (req, res) => {
 
 // ===== LOGOUT =====
 app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
+  req.session.destroy(() => res.redirect("/"));
 });
 
-// Tracks Discord user IDs that have already submitted
-const submittedUsers = new Set();
-
-// Helper to truncate long answers for Discord embed (field limit: 1024 chars)
+// ===== HELPERS =====
 function truncate(str, max = 1024) {
   if (!str) return "N/A";
   return str.length > max ? str.slice(0, max - 3) + "..." : str;
@@ -110,52 +103,21 @@ app.post("/submit", async (req, res) => {
       return res.status(401).json({ error: "Not logged in with Discord" });
     }
 
-    if (submittedUsers.has(user.id)) {
-      return res.status(409).json({ error: "You have already submitted an application." });
-    }
+    const { ign, about, plans, experience, rp2 } = req.body;
 
-    const {
-      ign,
-      about,
-      plans,
-      experience,
-      rp2
-    } = req.body;
+    const fields = [
+      { name: "About", value: truncate(about) },
+      { name: "Plans", value: truncate(plans) },
+      { name: "Experience", value: truncate(experience) },
+      { name: "RP — The Traitor", value: truncate(rp2) }
+    ];
 
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-
-    const embed = new EmbedBuilder()
-      .setTitle("📥 New Application")
-      .setColor(0x5865F2)
-      .addFields(
-        { name: "Minecraft IGN", value: "[hidden]" },
-        { name: "Discord", value: "[hidden]" },
-        { name: "About", value: truncate(about) },
-        { name: "Plans", value: truncate(plans) },
-        { name: "Experience", value: truncate(experience) },
-        { name: "RP — The Traitor", value: truncate(rp2) }
-      );
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("accept").setLabel("Accept").setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId("deny").setLabel("Deny").setStyle(ButtonStyle.Danger)
-    );
-
-    const message = await channel.send({
-      embeds: [embed],
-      components: [row]
-    });
-
-    // Mark this Discord account as having submitted
-    submittedUsers.add(user.id);
-
-    // Store real IGN, Discord, and userId keyed by message ID
-    applicationData.set(message.id, {
+    await sendApplication({
       ign: ign || "N/A",
       discord: user.username || "N/A",
-      userId: user.id
+      userId: user.id,
+      fields,
+      channelId: process.env.CHANNEL_ID
     });
 
     res.json({ success: true });
