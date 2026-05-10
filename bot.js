@@ -10,7 +10,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
 });
 
-// { ign, discord, userId, fields, scores: Map<staffId, score>, messageId, channelId }
+// { ign, discord, userId, fields, scores: Map<staffId, {score, username}>, messageId, channelId }
 const applicationData = new Map();
 
 // ===== READY =====
@@ -121,19 +121,22 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     const alreadyRated = data.scores.has(interaction.user.id);
-    data.scores.set(interaction.user.id, score);
 
-    // Add a ✅ reaction to the message so staff can see at a glance it's been rated
-    // Remove old reaction first if re-rating isn't their first time
-    try {
-      const channel = await client.channels.fetch(data.channelId);
-      const message = await channel.messages.fetch(messageId);
+    // Store score AND username so we can display it in /sort
+    data.scores.set(interaction.user.id, {
+      score,
+      username: interaction.user.username
+    });
 
-      if (!alreadyRated) {
+    // Add ✅ reaction on first rating only
+    if (!alreadyRated) {
+      try {
+        const channel = await client.channels.fetch(data.channelId);
+        const message = await channel.messages.fetch(messageId);
         await message.react("✅");
+      } catch (reactErr) {
+        console.error("Failed to react to message:", reactErr);
       }
-    } catch (reactErr) {
-      console.error("Failed to react to message:", reactErr);
     }
 
     await interaction.reply({
@@ -216,11 +219,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const sorted = [];
       for (const [messageId, data] of applicationData.entries()) {
-        const scores = [...data.scores.values()];
-        const avg = scores.length
-          ? scores.reduce((a, b) => a + b, 0) / scores.length
+        const entries = [...data.scores.values()];
+        const avg = entries.length
+          ? entries.reduce((a, b) => a + b.score, 0) / entries.length
           : 0;
-        sorted.push({ messageId, data, avg, count: scores.length });
+        sorted.push({ messageId, data, avg, count: entries.length });
       }
       sorted.sort((a, b) => b.avg - a.avg);
 
@@ -230,6 +233,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       for (let i = 0; i < sorted.length; i++) {
         const { messageId, data, avg, count } = sorted[i];
+
+        // Build the ratings breakdown string
+        let ratingsValue = "No ratings yet";
+        if (data.scores.size > 0) {
+          ratingsValue = [...data.scores.values()]
+            .map(({ username, score }) => `**${username}**: ${score}/10`)
+            .join("\n");
+        }
 
         const embed = new EmbedBuilder()
           .setTitle(`#${i + 1} — Application`)
@@ -242,7 +253,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
               value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
               inline: true
             },
-            ...data.fields
+            ...data.fields,
+            { name: "📋 Staff Ratings", value: ratingsValue }
           );
 
         const row = new ActionRowBuilder().addComponents(
@@ -291,10 +303,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const unrated = [];
 
     for (const [messageId, data] of applicationData.entries()) {
-      const score = data.scores.get(interaction.user.id);
+      const entry = data.scores.get(interaction.user.id);
       const link = `https://discord.com/channels/${interaction.guildId}/${data.channelId}/${messageId}`;
-      if (score !== undefined) {
-        rated.push(`✅ [Application](${link}) — you gave **${score}/10**`);
+      if (entry !== undefined) {
+        rated.push(`✅ [Application](${link}) — you gave **${entry.score}/10**`);
       } else {
         unrated.push(`❌ [Application](${link}) — not rated yet`);
       }
@@ -309,7 +321,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       ...rated
     ];
 
-    // Discord message limit safeguard — chunk if needed
     const chunks = [];
     let current = "";
     for (const line of lines) {
