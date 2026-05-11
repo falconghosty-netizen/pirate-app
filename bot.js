@@ -10,7 +10,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
 });
 
-// { ign, discord, userId, fields, scores: Map<staffId, {score, username}>, messageId, channelId }
+// { ign, discord, userId, fields, scores: Map<staffId, {score, username}>, messageId, channelId, type }
 const applicationData = new Map();
 
 // ===== READY =====
@@ -72,7 +72,8 @@ async function sendApplication({ ign, discord, userId, fields, channelId }) {
     ign, discord, userId, fields,
     scores: new Map(),
     messageId: message.id,
-    channelId
+    channelId,
+    type: "written"
   });
 }
 
@@ -109,7 +110,8 @@ async function sendVideoApplication({ ign, discord, userId, videoLink, channelId
     fields,
     scores: new Map(),
     messageId: message.id,
-    channelId
+    channelId,
+    type: "video"
   });
 }
 
@@ -238,57 +240,108 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      const resultsChannel = await client.channels.fetch(process.env.SORT_CHANNEL_ID);
+      const writtenChannel = await client.channels.fetch(process.env.SORT_CHANNEL_ID);
+      const videoChannel = await client.channels.fetch(process.env.VIDEO_CHANNEL_ID);
 
-      const sorted = [];
+      // Separate and sort each type
+      const written = [];
+      const video = [];
+
       for (const [messageId, data] of applicationData.entries()) {
         const entries = [...data.scores.values()];
         const avg = entries.length
           ? entries.reduce((a, b) => a + b.score, 0) / entries.length
           : 0;
-        sorted.push({ messageId, data, avg, count: entries.length });
+        const item = { messageId, data, avg, count: entries.length };
+        if (data.type === "video") video.push(item);
+        else written.push(item);
       }
-      sorted.sort((a, b) => b.avg - a.avg);
 
-      await resultsChannel.send({
-        content: `# 📊 Sorted Applications — ${sorted.length} total\nHighest to lowest average score.`
-      });
+      written.sort((a, b) => b.avg - a.avg);
+      video.sort((a, b) => b.avg - a.avg);
 
-      for (let i = 0; i < sorted.length; i++) {
-        const { messageId, data, avg, count } = sorted[i];
+      // Post written apps
+      if (written.length) {
+        await writtenChannel.send({
+          content: `# 📊 Sorted Written Applications — ${written.length} total\nHighest to lowest average score.`
+        });
 
-        let ratingsValue = "No ratings yet";
-        if (data.scores.size > 0) {
-          ratingsValue = [...data.scores.values()]
-            .map(({ username, score }) => `**${username}**: ${score}/10`)
-            .join("\n");
-        }
+        for (let i = 0; i < written.length; i++) {
+          const { messageId, data, avg, count } = written[i];
 
-        const embed = new EmbedBuilder()
-          .setTitle(`#${i + 1} — Application`)
-          .setColor(0x5865F2)
-          .addFields(
-            { name: "Minecraft IGN", value: "[hidden]", inline: true },
-            { name: "Discord", value: "[hidden]", inline: true },
-            {
-              name: "⭐ Avg Score",
-              value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
-              inline: true
-            },
-            ...data.fields,
-            { name: "📋 Staff Ratings", value: ratingsValue }
+          let ratingsValue = "No ratings yet";
+          if (data.scores.size > 0) {
+            ratingsValue = [...data.scores.values()]
+              .map(({ username, score }) => `**${username}**: ${score}/10`)
+              .join("\n");
+          }
+
+          const embed = new EmbedBuilder()
+            .setTitle(`#${i + 1} — Written Application`)
+            .setColor(0x5865F2)
+            .addFields(
+              { name: "Minecraft IGN", value: "[hidden]", inline: true },
+              { name: "Discord", value: "[hidden]", inline: true },
+              {
+                name: "⭐ Avg Score",
+                value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
+                inline: true
+              },
+              ...data.fields,
+              { name: "📋 Staff Ratings", value: ratingsValue }
+            );
+
+          const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`accept_${messageId}`).setLabel("Accept").setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`deny_${messageId}`).setLabel("Deny").setStyle(ButtonStyle.Danger)
           );
 
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder().setCustomId(`accept_${messageId}`).setLabel("Accept").setStyle(ButtonStyle.Success),
-          new ButtonBuilder().setCustomId(`deny_${messageId}`).setLabel("Deny").setStyle(ButtonStyle.Danger)
-        );
+          await writtenChannel.send({ embeds: [embed], components: [row] });
+        }
+      }
 
-        await resultsChannel.send({ embeds: [embed], components: [row] });
+      // Post video apps
+      if (video.length) {
+        await videoChannel.send({
+          content: `# 🎥 Sorted Video Applications — ${video.length} total\nHighest to lowest average score.`
+        });
+
+        for (let i = 0; i < video.length; i++) {
+          const { messageId, data, avg, count } = video[i];
+
+          let ratingsValue = "No ratings yet";
+          if (data.scores.size > 0) {
+            ratingsValue = [...data.scores.values()]
+              .map(({ username, score }) => `**${username}**: ${score}/10`)
+              .join("\n");
+          }
+
+          const embed = new EmbedBuilder()
+            .setTitle(`#${i + 1} — Video Application`)
+            .setColor(0xE67E22)
+            .addFields(
+              { name: "Minecraft IGN", value: "[hidden]", inline: true },
+              { name: "Discord", value: "[hidden]", inline: true },
+              {
+                name: "⭐ Avg Score",
+                value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
+                inline: true
+              },
+              ...data.fields,
+              { name: "📋 Staff Ratings", value: ratingsValue }
+            );
+
+          const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`accept_${messageId}`).setLabel("Accept").setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`deny_${messageId}`).setLabel("Deny").setStyle(ButtonStyle.Danger)
+          );
+
+          await videoChannel.send({ embeds: [embed], components: [row] });
+        }
       }
 
       await interaction.editReply(
-        `Done! ${sorted.length} applications posted in <#${process.env.SORT_CHANNEL_ID}>.`
+        `Done! ${written.length} written app${written.length !== 1 ? "s" : ""} → <#${process.env.SORT_CHANNEL_ID}> | ${video.length} video app${video.length !== 1 ? "s" : ""} → <#${process.env.VIDEO_CHANNEL_ID}>.`
       );
     } catch (err) {
       console.error("/sort error:", err);
@@ -321,10 +374,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     for (const [messageId, data] of applicationData.entries()) {
       const entry = data.scores.get(interaction.user.id);
       const link = `https://discord.com/channels/${interaction.guildId}/${data.channelId}/${messageId}`;
+      const label = data.type === "video" ? "🎥" : "📝";
       if (entry !== undefined) {
-        rated.push(`✅ [Application](${link}) — you gave **${entry.score}/10**`);
+        rated.push(`✅ ${label} [Application](${link}) — you gave **${entry.score}/10**`);
       } else {
-        unrated.push(`❌ [Application](${link}) — not rated yet`);
+        unrated.push(`❌ ${label} [Application](${link}) — not rated yet`);
       }
     }
 
