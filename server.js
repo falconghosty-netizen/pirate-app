@@ -1,4 +1,4 @@
-const { sendApplication } = require("./bot");
+const { sendApplication, sendVideoApplication } = require("./bot");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -94,14 +94,11 @@ function truncate(str, max = 1024) {
   return str.length > max ? str.slice(0, max - 3) + "..." : str;
 }
 
-// ===== SUBMIT =====
+// ===== SUBMIT (written) =====
 app.post("/submit", async (req, res) => {
   try {
     const user = req.session.user;
-
-    if (!user) {
-      return res.status(401).json({ error: "Not logged in with Discord" });
-    }
+    if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
 
     const { ign, about, plans, experience, rp2 } = req.body;
 
@@ -121,10 +118,32 @@ app.post("/submit", async (req, res) => {
     });
 
     res.json({ success: true });
-
   } catch (err) {
     console.error(err);
     res.status(500).send("Error submitting");
+  }
+});
+
+// ===== SUBMIT VIDEO =====
+app.post("/submit-video", async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
+
+    const { ign, videoLink } = req.body;
+
+    await sendVideoApplication({
+      ign: ign || "N/A",
+      discord: user.username || "N/A",
+      userId: user.id,
+      videoLink: videoLink || "N/A",
+      channelId: process.env.VIDEO_CHANNEL_ID
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error submitting video application");
   }
 });
 
