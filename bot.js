@@ -13,6 +13,11 @@ const client = new Client({
 // { ign, discord, userId, fields, scores: Map<staffId, {score, username}>, messageId, channelId, type }
 const applicationData = new Map();
 
+// ===== STAFF CHECK =====
+function isStaff(interaction) {
+  return interaction.member.roles.cache.has(process.env.STAFF_ROLE_ID);
+}
+
 // ===== READY =====
 client.once(Events.ClientReady, async () => {
   console.log(`Bot logged in as ${client.user.username}`);
@@ -232,6 +237,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   // ── /sort COMMAND ──
   if (interaction.isChatInputCommand() && interaction.commandName === "sort") {
+    if (!isStaff(interaction)) {
+      await interaction.reply({ content: "❌ You don't have permission to use this command.", ephemeral: true });
+      return;
+    }
+
     await interaction.deferReply({ ephemeral: true });
 
     try {
@@ -243,7 +253,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const writtenChannel = await client.channels.fetch(process.env.SORT_CHANNEL_ID);
       const videoChannel = await client.channels.fetch(process.env.VIDEO_CHANNEL_ID);
 
-      // Separate and sort each type
       const written = [];
       const video = [];
 
@@ -260,7 +269,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       written.sort((a, b) => b.avg - a.avg);
       video.sort((a, b) => b.avg - a.avg);
 
-      // Post written apps
       if (written.length) {
         await writtenChannel.send({
           content: `# 📊 Sorted Written Applications — ${written.length} total\nHighest to lowest average score.`
@@ -282,11 +290,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .addFields(
               { name: "Minecraft IGN", value: "[hidden]", inline: true },
               { name: "Discord", value: "[hidden]", inline: true },
-              {
-                name: "⭐ Avg Score",
-                value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
-                inline: true
-              },
+              { name: "⭐ Avg Score", value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`, inline: true },
               ...data.fields,
               { name: "📋 Staff Ratings", value: ratingsValue }
             );
@@ -300,7 +304,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
       }
 
-      // Post video apps
       if (video.length) {
         await videoChannel.send({
           content: `# 🎥 Sorted Video Applications — ${video.length} total\nHighest to lowest average score.`
@@ -322,11 +325,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .addFields(
               { name: "Minecraft IGN", value: "[hidden]", inline: true },
               { name: "Discord", value: "[hidden]", inline: true },
-              {
-                name: "⭐ Avg Score",
-                value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`,
-                inline: true
-              },
+              { name: "⭐ Avg Score", value: `**${avg.toFixed(1)}/10** (${count} rating${count !== 1 ? "s" : ""})`, inline: true },
               ...data.fields,
               { name: "📋 Staff Ratings", value: ratingsValue }
             );
@@ -341,7 +340,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       await interaction.editReply(
-        `Done! ${written.length} written app${written.length !== 1 ? "s" : ""} → <#${process.env.SORT_CHANNEL_ID}> | ${video.length} video app${video.length !== 1 ? "s" : ""} → <#${process.env.VIDEO_CHANNEL_ID}>.`
+        `Done! ${written.length} written → <#${process.env.SORT_CHANNEL_ID}> | ${video.length} video → <#${process.env.VIDEO_CHANNEL_ID}>.`
       );
     } catch (err) {
       console.error("/sort error:", err);
@@ -352,6 +351,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   // ── /clearapps COMMAND ──
   if (interaction.isChatInputCommand() && interaction.commandName === "clearapps") {
+    if (!isStaff(interaction)) {
+      await interaction.reply({ content: "❌ You don't have permission to use this command.", ephemeral: true });
+      return;
+    }
+
     const count = applicationData.size;
     applicationData.clear();
     await interaction.reply({
@@ -363,6 +367,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   // ── /progress COMMAND ──
   if (interaction.isChatInputCommand() && interaction.commandName === "progress") {
+    if (!isStaff(interaction)) {
+      await interaction.reply({ content: "❌ You don't have permission to use this command.", ephemeral: true });
+      return;
+    }
+
     if (!applicationData.size) {
       await interaction.reply({ content: "No applications found.", ephemeral: true });
       return;
