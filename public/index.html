@@ -179,7 +179,7 @@
 
     <hr>
 
-    <p style="margin-bottom:8px;">Choose your application type:</p>
+    <p id="appTypeLabel" style="margin-bottom:8px;">Choose your application type:</p>
     <div class="type-choice">
       <button id="btnWritten" class="active" onclick="switchType('written')">✍️ Written</button>
       <button id="btnVideo" onclick="switchType('video')">🎥 Video</button>
@@ -325,13 +325,9 @@ async function init() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
-    if (r.status === 409) {
-      showMsg("alreadyAppliedMessage");
-    } else if (!r.ok) {
-      alert("Submission failed: " + await r.text());
-    } else {
-      showMsg("thankYouMessage");
-    }
+    if (r.status === 409) showMsg("alreadyAppliedMessage");
+    else if (!r.ok) alert("Submission failed: " + await r.text());
+    else showMsg("thankYouMessage");
   });
 
   // ── Video form submit ──
@@ -343,13 +339,9 @@ async function init() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
-    if (r.status === 409) {
-      showMsg("alreadyAppliedMessage");
-    } else if (!r.ok) {
-      alert("Submission failed: " + await r.text());
-    } else {
-      showMsg("thankYouMessage");
-    }
+    if (r.status === 409) showMsg("alreadyAppliedMessage");
+    else if (!r.ok) alert("Submission failed: " + await r.text());
+    else showMsg("thankYouMessage");
   });
 }
 
@@ -357,6 +349,7 @@ function showMsg(id) {
   document.getElementById("writtenForm").style.display = "none";
   document.getElementById("videoForm").style.display = "none";
   document.querySelector(".type-choice").style.display = "none";
+  document.getElementById("appTypeLabel").style.display = "none";
   document.getElementById(id).style.display = "block";
 }
 
