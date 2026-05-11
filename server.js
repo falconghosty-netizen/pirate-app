@@ -137,7 +137,7 @@ app.post("/submit-video", async (req, res) => {
       discord: user.username || "N/A",
       userId: user.id,
       videoLink: videoLink || "N/A",
-      channelId: process.env.VIDEO_CHANNEL_ID
+      channelId: process.env.CHANNEL_ID  // same channel as written apps
     });
 
     res.json({ success: true });
