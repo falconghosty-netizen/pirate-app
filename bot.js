@@ -44,7 +44,7 @@ client.once(Events.ClientReady, async () => {
   }
 });
 
-// ===== SEND APPLICATION (called from server.js) =====
+// ===== SEND WRITTEN APPLICATION =====
 async function sendApplication({ ign, discord, userId, fields, channelId }) {
   const channel = await client.channels.fetch(channelId);
 
@@ -70,6 +70,43 @@ async function sendApplication({ ign, discord, userId, fields, channelId }) {
 
   applicationData.set(message.id, {
     ign, discord, userId, fields,
+    scores: new Map(),
+    messageId: message.id,
+    channelId
+  });
+}
+
+// ===== SEND VIDEO APPLICATION =====
+async function sendVideoApplication({ ign, discord, userId, videoLink, channelId }) {
+  const channel = await client.channels.fetch(channelId);
+
+  const fields = [
+    { name: "Video Link", value: videoLink }
+  ];
+
+  const embed = new EmbedBuilder()
+    .setTitle("🎥 New Video Application")
+    .setColor(0xE67E22)
+    .addFields(
+      { name: "Minecraft IGN", value: "[hidden]", inline: true },
+      { name: "Discord", value: "[hidden]", inline: true },
+      { name: "Video Link", value: videoLink }
+    );
+
+  const message = await channel.send({ embeds: [embed] });
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`rate_${message.id}`)
+      .setLabel("Rate")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  await message.edit({ components: [row] });
+
+  applicationData.set(message.id, {
+    ign, discord, userId,
+    fields,
     scores: new Map(),
     messageId: message.id,
     channelId
@@ -121,21 +158,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     const alreadyRated = data.scores.has(interaction.user.id);
+    data.scores.set(interaction.user.id, { score, username: interaction.user.username });
 
-    // Store score AND username so we can display it in /sort
-    data.scores.set(interaction.user.id, {
-      score,
-      username: interaction.user.username
-    });
-
-    // Add ✅ reaction on first rating only
     if (!alreadyRated) {
       try {
         const channel = await client.channels.fetch(data.channelId);
         const message = await channel.messages.fetch(messageId);
         await message.react("✅");
       } catch (reactErr) {
-        console.error("Failed to react to message:", reactErr);
+        console.error("Failed to react:", reactErr);
       }
     }
 
@@ -148,7 +179,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
-  // ── ACCEPT / DENY (in sort results channel) ──
+  // ── ACCEPT / DENY ──
   if (interaction.isButton() &&
     (interaction.customId.startsWith("accept_") || interaction.customId.startsWith("deny_"))) {
     try {
@@ -172,16 +203,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .spliceFields(1, 1, { name: "Discord", value: realDiscord, inline: true });
 
       const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`accept_${messageId}`)
-          .setLabel("Accept")
-          .setStyle(ButtonStyle.Success)
-          .setDisabled(true),
-        new ButtonBuilder()
-          .setCustomId(`deny_${messageId}`)
-          .setLabel("Deny")
-          .setStyle(ButtonStyle.Danger)
-          .setDisabled(true)
+        new ButtonBuilder().setCustomId(`accept_${messageId}`).setLabel("Accept").setStyle(ButtonStyle.Success).setDisabled(true),
+        new ButtonBuilder().setCustomId(`deny_${messageId}`).setLabel("Deny").setStyle(ButtonStyle.Danger).setDisabled(true)
       );
 
       await interaction.update({ embeds: [updatedEmbed], components: [row] });
@@ -234,7 +257,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       for (let i = 0; i < sorted.length; i++) {
         const { messageId, data, avg, count } = sorted[i];
 
-        // Build the ratings breakdown string
         let ratingsValue = "No ratings yet";
         if (data.scores.size > 0) {
           ratingsValue = [...data.scores.values()]
@@ -258,14 +280,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
           );
 
         const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId(`accept_${messageId}`)
-            .setLabel("Accept")
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId(`deny_${messageId}`)
-            .setLabel("Deny")
-            .setStyle(ButtonStyle.Danger)
+          new ButtonBuilder().setCustomId(`accept_${messageId}`).setLabel("Accept").setStyle(ButtonStyle.Success),
+          new ButtonBuilder().setCustomId(`deny_${messageId}`).setLabel("Deny").setStyle(ButtonStyle.Danger)
         );
 
         await resultsChannel.send({ embeds: [embed], components: [row] });
@@ -313,10 +329,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     const total = applicationData.size;
-    const ratedCount = rated.length;
-
     const lines = [
-      `**Your progress: ${ratedCount}/${total} rated**\n`,
+      `**Your progress: ${rated.length}/${total} rated**\n`,
       ...unrated,
       ...rated
     ];
@@ -324,19 +338,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const chunks = [];
     let current = "";
     for (const line of lines) {
-      if ((current + "\n" + line).length > 1900) {
-        chunks.push(current);
-        current = line;
-      } else {
-        current += (current ? "\n" : "") + line;
-      }
+      if ((current + "\n" + line).length > 1900) { chunks.push(current); current = line; }
+      else current += (current ? "\n" : "") + line;
     }
     if (current) chunks.push(current);
 
     await interaction.reply({ content: chunks[0], ephemeral: true });
-    for (let i = 1; i < chunks.length; i++) {
+    for (let i = 1; i < chunks.length; i++)
       await interaction.followUp({ content: chunks[i], ephemeral: true });
-    }
     return;
   }
 
@@ -344,4 +353,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // ===== LOGIN =====
 client.login(process.env.BOT_TOKEN);
-module.exports = { client, applicationData, sendApplication };
+module.exports = { client, applicationData, sendApplication, sendVideoApplication };
