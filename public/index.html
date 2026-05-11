@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>150 Player Pirate Civilization</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body {
       margin: 0;
@@ -16,254 +15,147 @@
       align-items: center;
       overflow-x: hidden;
     }
-
-    /* Background image layer with pan/zoom animation */
     body::before {
       content: '';
       position: fixed;
       inset: -10%;
       width: 120%;
       height: 120%;
-      background:
-        url("https://static.planetminecraft.com/files/image/minecraft/project/2024/592/17901293-c_l.webp");
+      background: url("https://static.planetminecraft.com/files/image/minecraft/project/2024/592/17901293-c_l.webp");
       background-size: cover;
       background-position: center;
       animation: kenBurns 25s ease-in-out infinite alternate;
       z-index: -3;
     }
-
-    /* Dark base overlay */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.52);
+      background: rgba(0,0,0,0.52);
       z-index: -2;
     }
-
-    /* Warm amber colour grade + vignette */
     .bg-effects {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: -1;
-      background: rgba(60, 35, 5, 0.13);
-      box-shadow: inset 0 0 180px 60px rgba(0, 0, 0, 0.7);
+      background: rgba(60,35,5,0.13);
+      box-shadow: inset 0 0 180px 60px rgba(0,0,0,0.7);
     }
-
     @keyframes kenBurns {
-      0%   { transform: scale(1.0) translate(0%, 0%); }
-      33%  { transform: scale(1.04) translate(-1%, 0.5%); }
-      66%  { transform: scale(1.06) translate(0.5%, -1%); }
-      100% { transform: scale(1.03) translate(-0.5%, 0.5%); }
+      0%   { transform: scale(1.0) translate(0%,0%); }
+      33%  { transform: scale(1.04) translate(-1%,0.5%); }
+      66%  { transform: scale(1.06) translate(0.5%,-1%); }
+      100% { transform: scale(1.03) translate(-0.5%,0.5%); }
     }
-
-    /* ===== SPLASH SCREEN ===== */
     #splash {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; inset: 0; z-index: 99999;
+      background: black; display: flex;
+      align-items: center; justify-content: center;
       transition: opacity 1.4s ease;
     }
-
-    #splash video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    #splash.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-
-    /* ===== END SPLASH ===== */
-
+    #splash video { width: 100%; height: 100%; object-fit: cover; }
+    #splash.fade-out { opacity: 0; pointer-events: none; }
     .container {
-      background: rgba(20, 20, 20, 0.9);
-      padding: 30px;
-      border-radius: 24px;
-      width: 100%;
-      max-width: 500px;
+      background: rgba(20,20,20,0.9);
+      padding: 30px; border-radius: 24px;
+      width: 100%; max-width: 500px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-      text-align: center;
-      max-height: 90vh;
+      text-align: center; max-height: 90vh;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #5865F2 #1a1a1a;
     }
-
     input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 16px;
-      border: none;
-      background: #1f1f1f;
-      color: white;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      resize: vertical;
-      box-sizing: border-box;
+      width: 100%; padding: 12px; margin: 10px 0;
+      border-radius: 16px; border: none;
+      background: #1f1f1f; color: white;
+      font-family: Arial, sans-serif; font-size: 14px;
+      resize: vertical; box-sizing: border-box;
     }
-
     button {
-      width: 100%;
-      padding: 14px;
-      border: none;
+      width: 100%; padding: 14px; border: none;
       border-radius: 16px;
       background: linear-gradient(135deg, #5865F2, #7289da);
-      color: white;
-      cursor: pointer;
-      margin-top: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.4px;
-      box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+      color: white; cursor: pointer; margin-top: 10px;
+      font-size: 15px; font-weight: 600; letter-spacing: 0.4px;
+      box-shadow: 0 4px 15px rgba(88,101,242,0.4);
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
-
     button:hover {
       background: linear-gradient(135deg, #4752c4, #5865F2);
-      box-shadow: 0 6px 20px rgba(88, 101, 242, 0.6);
+      box-shadow: 0 6px 20px rgba(88,101,242,0.6);
       transform: translateY(-2px);
     }
-
-    button:active {
-      transform: translateY(0px);
-      box-shadow: 0 2px 8px rgba(88, 101, 242, 0.4);
+    button:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(88,101,242,0.4); }
+    .secondary { background: #444; box-shadow: none; }
+    .secondary:hover { background: #555; box-shadow: none; }
+    .type-choice {
+      display: flex; gap: 12px; margin: 16px 0;
     }
-
-    .secondary {
-      background: #444;
+    .type-choice button {
+      flex: 1; margin: 0;
+      background: #1f1f1f;
+      border: 2px solid #2a2a2a;
+      box-shadow: none;
+      font-size: 14px;
+      transition: all 0.15s ease;
     }
-
-    #thankYouMessage {
-      display: none;
-      margin-top: 20px;
+    .type-choice button:hover {
+      border-color: #5865F2;
+      background: #2a2a2a;
+      transform: none;
+      box-shadow: none;
     }
-
-    .char-counter {
-      text-align: right;
-      font-size: 11px;
-      color: #888;
-      margin-top: -6px;
-      margin-bottom: 4px;
+    .type-choice button.active {
+      border-color: #5865F2;
+      background: linear-gradient(135deg, #5865F2, #7289da);
+      box-shadow: 0 4px 15px rgba(88,101,242,0.4);
     }
-
-    .char-counter.over {
-      color: #e74c3c;
-    }
-
     hr {
-      border: none;
-      height: 1px;
+      border: none; height: 1px;
       background: linear-gradient(to right, transparent, #5865F2, transparent);
-      margin: 20px 0;
-      opacity: 0.6;
+      margin: 20px 0; opacity: 0.6;
     }
-
-    .container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .container::-webkit-scrollbar-track {
-      background: #1a1a1a;
-      border-radius: 10px;
-    }
-
-    .container::-webkit-scrollbar-thumb {
-      background: #5865F2;
-      border-radius: 10px;
-    }
-
+    .container::-webkit-scrollbar { width: 6px; }
+    .container::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 10px; }
+    .container::-webkit-scrollbar-thumb { background: #5865F2; border-radius: 10px; }
     .section-card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 16px;
-      padding: 16px;
-      margin: 8px 0;
-      text-align: left;
-      overflow: hidden;
+      background: #1a1a1a; border: 1px solid #2a2a2a;
+      border-radius: 16px; padding: 16px;
+      margin: 8px 0; text-align: left; overflow: hidden;
     }
-
-    .section-card p {
-      margin: 0 0 10px 0;
-      font-size: 13px;
-      color: #aaa;
-    }
-
+    .section-card p { margin: 0 0 10px 0; font-size: 13px; color: #aaa; }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-
-    .typewriter {
-      display: block;
-      animation: fadeInUp 0.8s ease forwards;
-    }
-
-    .fade-in {
-      opacity: 0;
-      animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .field-group {
-      text-align: left;
-      margin: 10px 0 4px 0;
-    }
-
+    .fade-in { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
+    .field-group { text-align: left; margin: 10px 0 4px 0; }
     .field-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #9aa0f5;
-      margin-bottom: 4px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      display: block; font-size: 12px; font-weight: 600;
+      color: #9aa0f5; margin-bottom: 4px;
+      letter-spacing: 0.5px; text-transform: uppercase;
     }
-
-    .field-group input,
-    .field-group textarea {
-      margin: 0;
-    }
-
+    .field-group input, .field-group textarea { margin: 0; }
     .discord-badge {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      transition: transform 0.2s ease, opacity 0.2s ease;
+      position: fixed; bottom: 20px; right: 20px;
+      z-index: 1000; transition: transform 0.2s ease, opacity 0.2s ease;
       opacity: 0.9;
     }
-
-    .discord-badge:hover {
-      transform: scale(1.08);
-      opacity: 1;
-    }
-
+    .discord-badge:hover { transform: scale(1.08); opacity: 1; }
     .discord-badge img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
   </style>
 </head>
-
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splash">
   <video id="splashVideo" autoplay muted playsinline>
     <source src="/intro.mp4" type="video/mp4">
   </video>
-
 </div>
 
 <div class="bg-effects"></div>
@@ -272,58 +164,77 @@
 
   <!-- LOGIN PAGE -->
   <div id="loginPage">
-    <h1 class="fade-in" style="animation-delay: 0.1s;">150 Player Pirate Civilization Event</h1>
-    <p class="fade-in" style="animation-delay: 0.4s;">Please login with Discord to continue</p>
-    <div class="fade-in" style="animation-delay: 0.7s;"><a href="/login"><button>Login with Discord</button></a></div>
+    <h1 class="fade-in" style="animation-delay:0.1s;">150 Player Pirate Civilization Event</h1>
+    <p class="fade-in" style="animation-delay:0.4s;">Please login with Discord to continue</p>
+    <div class="fade-in" style="animation-delay:0.7s;">
+      <a href="/login"><button>Login with Discord</button></a>
+    </div>
   </div>
 
   <!-- APPLICATION PAGE -->
   <div id="appPage" style="display:none;">
     <h1>150 Player Pirate Civilization Event</h1>
-
     <p>Logged in as <b id="username"></b></p>
-
     <a href="/logout"><button class="secondary">Logout</button></a>
 
     <hr>
 
-    <form id="applicationForm">
+    <p style="margin-bottom:8px;">Choose your application type:</p>
+    <div class="type-choice">
+      <button id="btnWritten" class="active" onclick="switchType('written')">✍️ Written</button>
+      <button id="btnVideo" onclick="switchType('video')">🎥 Video</button>
+    </div>
+
+    <hr>
+
+    <!-- WRITTEN FORM -->
+    <form id="writtenForm">
       <div class="field-group">
         <label>Minecraft IGN</label>
-        <input name="ign" id="ign" placeholder="Your in-game name" required>
+        <input name="ign" placeholder="Your in-game name" required>
       </div>
-
       <div class="field-group">
         <label>Discord Username</label>
-        <input name="discordName" id="discordName" placeholder="Discord Username" readonly required>
+        <input name="discordName" id="discordNameWritten" placeholder="Discord Username" readonly required>
       </div>
-
       <div class="field-group">
         <label>About You</label>
         <textarea name="about" placeholder="Tell us about yourself!" required></textarea>
       </div>
-
       <div class="field-group">
         <label>Your Plans</label>
         <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
       </div>
-
       <div class="field-group">
         <label>Previous Experience</label>
         <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
       </div>
-
       <hr>
       <div class="section-card">
         <p><b>Roleplay Question!</b> Reply in the character you plan on playing in the event.</p>
-
         <div class="field-group">
           <label>The Traitor</label>
           <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
         </div>
       </div>
-
       <button type="submit">Submit Application</button>
+    </form>
+
+    <!-- VIDEO FORM -->
+    <form id="videoForm" style="display:none;">
+      <div class="field-group">
+        <label>Minecraft IGN</label>
+        <input name="ign" placeholder="Your in-game name" required>
+      </div>
+      <div class="field-group">
+        <label>Discord Username</label>
+        <input name="discordName" id="discordNameVideo" placeholder="Discord Username" readonly required>
+      </div>
+      <div class="field-group">
+        <label>Video Link</label>
+        <input name="videoLink" placeholder="Paste your video link here" required>
+      </div>
+      <button type="submit">Submit Video Application</button>
     </form>
 
     <div id="thankYouMessage" style="display:none;">
@@ -333,7 +244,7 @@
 
     <div id="alreadyAppliedMessage" style="display:none;">
       <h2>Already Applied</h2>
-      <p>You've already submitted an application with this Discord account. You can only apply once.</p>
+      <p>You've already submitted an application with this Discord account.</p>
     </div>
   </div>
 
@@ -349,15 +260,33 @@ function dismissSplash() {
   setTimeout(() => splash.remove(), 1400);
 }
 
-// Only show splash once per browser session
 if (localStorage.getItem("splashSeen")) {
   splash.remove();
 } else {
   localStorage.setItem("splashSeen", "1");
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => splash.remove());
-// Fallback: force dismiss after 15s in case video hangs
   setTimeout(dismissSplash, 15000);
+}
+
+// ===== TYPE SWITCHER =====
+function switchType(type) {
+  const written = document.getElementById("writtenForm");
+  const video = document.getElementById("videoForm");
+  const btnW = document.getElementById("btnWritten");
+  const btnV = document.getElementById("btnVideo");
+
+  if (type === "written") {
+    written.style.display = "block";
+    video.style.display = "none";
+    btnW.classList.add("active");
+    btnV.classList.remove("active");
+  } else {
+    written.style.display = "none";
+    video.style.display = "block";
+    btnV.classList.add("active");
+    btnW.classList.remove("active");
+  }
 }
 
 // ===== MAIN =====
@@ -378,48 +307,57 @@ async function init() {
   appPage.style.display = "block";
 
   let displayName = "Unknown User";
-
-  if (user.global_name) {
-    displayName = user.global_name;
-  } else if (user.username && user.discriminator && user.discriminator !== "0") {
+  if (user.global_name) displayName = user.global_name;
+  else if (user.username && user.discriminator && user.discriminator !== "0")
     displayName = `${user.username}#${user.discriminator}`;
-  } else if (user.username) {
-    displayName = user.username;
-  }
+  else if (user.username) displayName = user.username;
 
   document.getElementById("username").innerText = displayName;
-  document.getElementById("discordName").value = displayName;
+  document.getElementById("discordNameWritten").value = displayName;
+  document.getElementById("discordNameVideo").value = displayName;
 
-  const form = document.getElementById("applicationForm");
-
-  form.addEventListener("submit", async (e) => {
+  // ── Written form submit ──
+  document.getElementById("writtenForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const data = Object.fromEntries(new FormData(form).entries());
-
-    const res = await fetch("/submit", {
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    const r = await fetch("/submit", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
-
-    if (res.status === 409) {
-      form.style.display = "none";
-      document.getElementById("alreadyAppliedMessage").style.display = "block";
-      return;
+    if (r.status === 409) {
+      showMsg("alreadyAppliedMessage");
+    } else if (!r.ok) {
+      alert("Submission failed: " + await r.text());
+    } else {
+      showMsg("thankYouMessage");
     }
-
-    if (!res.ok) {
-      const text = await res.text();
-      alert("Submission failed: " + text);
-      return;
-    }
-
-    form.style.display = "none";
-    document.getElementById("thankYouMessage").style.display = "block";
   });
+
+  // ── Video form submit ──
+  document.getElementById("videoForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    const r = await fetch("/submit-video", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (r.status === 409) {
+      showMsg("alreadyAppliedMessage");
+    } else if (!r.ok) {
+      alert("Submission failed: " + await r.text());
+    } else {
+      showMsg("thankYouMessage");
+    }
+  });
+}
+
+function showMsg(id) {
+  document.getElementById("writtenForm").style.display = "none";
+  document.getElementById("videoForm").style.display = "none";
+  document.querySelector(".type-choice").style.display = "none";
+  document.getElementById(id).style.display = "block";
 }
 
 init();
