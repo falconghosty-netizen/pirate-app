@@ -126,6 +126,29 @@
       margin: 8px 0; text-align: left; overflow: hidden;
     }
     .section-card p { margin: 0 0 10px 0; font-size: 13px; color: #aaa; }
+    .reference-box {
+      background: #111;
+      border: 1px solid #5865F2;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 12px 0;
+      text-align: left;
+    }
+    .reference-box p {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9aa0f5;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .reference-box ol {
+      margin: 0;
+      padding-left: 18px;
+      color: #ccc;
+      font-size: 13px;
+      line-height: 1.8;
+    }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -222,6 +245,17 @@
 
     <!-- VIDEO FORM -->
     <form id="videoForm" style="display:none;">
+
+      <div class="reference-box">
+        <p>📋 Cover these topics in your video</p>
+        <ol>
+          <li>Tell us about yourself</li>
+          <li>What are your plans for the event?</li>
+          <li>Previous civ event experience?</li>
+          <li><b>Roleplay:</b> Your captain asks you to throw a friend to the sharks for stealing treasure — what do you do? (answer in character)</li>
+        </ol>
+      </div>
+
       <div class="field-group">
         <label>Minecraft IGN</label>
         <input name="ign" placeholder="Your in-game name" required>
@@ -251,7 +285,6 @@
 </div>
 
 <script>
-// ===== SPLASH =====
 const splash = document.getElementById("splash");
 const splashVideo = document.getElementById("splashVideo");
 
@@ -269,13 +302,11 @@ if (localStorage.getItem("splashSeen")) {
   setTimeout(dismissSplash, 15000);
 }
 
-// ===== TYPE SWITCHER =====
 function switchType(type) {
   const written = document.getElementById("writtenForm");
   const video = document.getElementById("videoForm");
   const btnW = document.getElementById("btnWritten");
   const btnV = document.getElementById("btnVideo");
-
   if (type === "written") {
     written.style.display = "block";
     video.style.display = "none";
@@ -289,7 +320,6 @@ function switchType(type) {
   }
 }
 
-// ===== MAIN =====
 async function init() {
   const res = await fetch("/user");
   const user = await res.json();
@@ -316,7 +346,6 @@ async function init() {
   document.getElementById("discordNameWritten").value = displayName;
   document.getElementById("discordNameVideo").value = displayName;
 
-  // ── Written form submit ──
   document.getElementById("writtenForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.target).entries());
@@ -330,7 +359,6 @@ async function init() {
     else showMsg("thankYouMessage");
   });
 
-  // ── Video form submit ──
   document.getElementById("videoForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.target).entries());
