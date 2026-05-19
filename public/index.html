@@ -15,6 +15,7 @@
       align-items: center;
       overflow-x: hidden;
     }
+
     body::before {
       content: '';
       position: fixed;
@@ -27,6 +28,7 @@
       animation: kenBurns 25s ease-in-out infinite alternate;
       z-index: -3;
     }
+
     body::after {
       content: '';
       position: fixed;
@@ -34,6 +36,7 @@
       background: rgba(0,0,0,0.52);
       z-index: -2;
     }
+
     .bg-effects {
       position: fixed;
       inset: 0;
@@ -42,137 +45,239 @@
       background: rgba(60,35,5,0.13);
       box-shadow: inset 0 0 180px 60px rgba(0,0,0,0.7);
     }
+
     @keyframes kenBurns {
       0%   { transform: scale(1.0) translate(0%,0%); }
       33%  { transform: scale(1.04) translate(-1%,0.5%); }
       66%  { transform: scale(1.06) translate(0.5%,-1%); }
       100% { transform: scale(1.03) translate(-0.5%,0.5%); }
     }
+
     #splash {
-      position: fixed; inset: 0; z-index: 99999;
-      background: black; display: flex;
-      align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: opacity 1.4s ease;
     }
-    #splash video { width: 100%; height: 100%; object-fit: cover; }
-    #splash.fade-out { opacity: 0; pointer-events: none; }
+
+    #splash video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .container {
       background: rgba(20,20,20,0.9);
-      padding: 30px; border-radius: 24px;
-      width: 100%; max-width: 500px;
+      padding: 30px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 500px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-      text-align: center; max-height: 90vh;
+      text-align: center;
+      max-height: 90vh;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #5865F2 #1a1a1a;
     }
-    input, textarea {
-      width: 100%; padding: 12px; margin: 10px 0;
-      border-radius: 16px; border: none;
-      background: #1f1f1f; color: white;
-      font-family: Arial, sans-serif; font-size: 14px;
-      resize: vertical; box-sizing: border-box;
+
+    /* NEW WELCOME BANNER */
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(120,0,0,0.95), rgba(180,20,20,0.9));
+      border: 1px solid rgba(255,80,80,0.35);
+      border-radius: 22px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      box-shadow:
+        0 0 25px rgba(255,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
     }
+
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          120deg,
+          transparent 0%,
+          rgba(255,255,255,0.08) 45%,
+          transparent 100%
+        );
+      transform: translateX(-100%);
+      animation: shine 5s linear infinite;
+    }
+
+    .welcome-banner h2 {
+      margin: 0;
+      color: #fff5f5;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes shine {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 16px;
+      border: none;
+      background: #1f1f1f;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
     button {
-      width: 100%; padding: 14px; border: none;
+      width: 100%;
+      padding: 14px;
+      border: none;
       border-radius: 16px;
       background: linear-gradient(135deg, #5865F2, #7289da);
-      color: white; cursor: pointer; margin-top: 10px;
-      font-size: 15px; font-weight: 600; letter-spacing: 0.4px;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
       box-shadow: 0 4px 15px rgba(88,101,242,0.4);
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
+
     button:hover {
       background: linear-gradient(135deg, #4752c4, #5865F2);
       box-shadow: 0 6px 20px rgba(88,101,242,0.6);
       transform: translateY(-2px);
     }
-    button:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(88,101,242,0.4); }
-    .secondary { background: #444; box-shadow: none; }
-    .secondary:hover { background: #555; box-shadow: none; }
-    .type-choice {
-      display: flex; gap: 12px; margin: 16px 0;
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(88,101,242,0.4);
     }
+
+    .secondary {
+      background: #444;
+      box-shadow: none;
+    }
+
+    .secondary:hover {
+      background: #555;
+      box-shadow: none;
+    }
+
+    .type-choice {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
     .type-choice button {
-      flex: 1; margin: 0;
+      flex: 1;
+      margin: 0;
       background: #1f1f1f;
       border: 2px solid #2a2a2a;
       box-shadow: none;
       font-size: 14px;
       transition: all 0.15s ease;
     }
+
     .type-choice button:hover {
       border-color: #5865F2;
       background: #2a2a2a;
       transform: none;
       box-shadow: none;
     }
+
     .type-choice button.active {
       border-color: #5865F2;
       background: linear-gradient(135deg, #5865F2, #7289da);
       box-shadow: 0 4px 15px rgba(88,101,242,0.4);
     }
+
     hr {
-      border: none; height: 1px;
+      border: none;
+      height: 1px;
       background: linear-gradient(to right, transparent, #5865F2, transparent);
-      margin: 20px 0; opacity: 0.6;
+      margin: 20px 0;
+      opacity: 0.6;
     }
-    .container::-webkit-scrollbar { width: 6px; }
-    .container::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 10px; }
-    .container::-webkit-scrollbar-thumb { background: #5865F2; border-radius: 10px; }
-    .section-card {
-      background: #1a1a1a; border: 1px solid #2a2a2a;
-      border-radius: 16px; padding: 16px;
-      margin: 8px 0; text-align: left; overflow: hidden;
+
+    .container::-webkit-scrollbar {
+      width: 6px;
     }
-    .section-card p { margin: 0 0 10px 0; font-size: 13px; color: #aaa; }
-    .reference-box {
-      background: #111;
-      border: 1px solid #5865F2;
-      border-radius: 16px;
-      padding: 16px;
-      margin: 12px 0;
-      text-align: left;
+
+    .container::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 10px;
     }
-    .reference-box p {
-      margin: 0 0 8px 0;
-      font-size: 12px;
-      font-weight: 600;
-      color: #9aa0f5;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+
+    .container::-webkit-scrollbar-thumb {
+      background: #5865F2;
+      border-radius: 10px;
     }
-    .reference-box ol {
-      margin: 0;
-      padding-left: 18px;
-      color: #ccc;
-      font-size: 13px;
-      line-height: 1.8;
-    }
+
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .fade-in { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
-    .field-group { text-align: left; margin: 10px 0 4px 0; }
-    .field-group label {
-      display: block; font-size: 12px; font-weight: 600;
-      color: #9aa0f5; margin-bottom: 4px;
-      letter-spacing: 0.5px; text-transform: uppercase;
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease forwards;
     }
-    .field-group input, .field-group textarea { margin: 0; }
+
     .discord-badge {
-      position: fixed; bottom: 20px; right: 20px;
-      z-index: 1000; transition: transform 0.2s ease, opacity 0.2s ease;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      transition: transform 0.2s ease, opacity 0.2s ease;
       opacity: 0.9;
     }
-    .discord-badge:hover { transform: scale(1.08); opacity: 1; }
+
+    .discord-badge:hover {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+
     .discord-badge img {
-      width: 80px; height: 80px; border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
   </style>
 </head>
+
 <body>
 
 <div id="splash">
@@ -185,204 +290,29 @@
 
 <div class="container">
 
-  <!-- LOGIN PAGE -->
-  <div id="loginPage">
-    <h1 class="fade-in" style="animation-delay:0.1s;">150 Player Pirate Civilization Event</h1>
-    <p class="fade-in" style="animation-delay:0.4s;">Please login with Discord to continue</p>
-    <div class="fade-in" style="animation-delay:0.7s;">
-      <a href="/login"><button>Login with Discord</button></a>
-    </div>
+  <!-- NEW TITLE BOX -->
+  <div class="welcome-banner fade-in" style="animation-delay:0.05s;">
+    <h2>Welcome to Sarkovia Events</h2>
   </div>
 
-  <!-- APPLICATION PAGE -->
-  <div id="appPage" style="display:none;">
-    <h1>150 Player Pirate Civilization Event</h1>
-    <p>Logged in as <b id="username"></b></p>
-    <a href="/logout"><button class="secondary">Logout</button></a>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage">
+    <h1 class="fade-in" style="animation-delay:0.1s;">
+      150 Player Pirate Civilization Event
+    </h1>
 
-    <hr>
+    <p class="fade-in" style="animation-delay:0.4s;">
+      Please login with Discord to continue
+    </p>
 
-    <p id="appTypeLabel" style="margin-bottom:8px;">Choose your application type:</p>
-    <div class="type-choice">
-      <button id="btnWritten" class="active" onclick="switchType('written')">✍️ Written</button>
-      <button id="btnVideo" onclick="switchType('video')">🎥 Video</button>
-    </div>
-
-    <hr>
-
-    <!-- WRITTEN FORM -->
-    <form id="writtenForm">
-      <div class="field-group">
-        <label>Minecraft IGN</label>
-        <input name="ign" placeholder="Your in-game name" required>
-      </div>
-      <div class="field-group">
-        <label>Discord Username</label>
-        <input name="discordName" id="discordNameWritten" placeholder="Discord Username" readonly required>
-      </div>
-      <div class="field-group">
-        <label>About You</label>
-        <textarea name="about" placeholder="Tell us about yourself!" required></textarea>
-      </div>
-      <div class="field-group">
-        <label>Your Plans</label>
-        <textarea name="plans" placeholder="What are your plans for this event?" required></textarea>
-      </div>
-      <div class="field-group">
-        <label>Previous Experience</label>
-        <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
-      </div>
-      <hr>
-      <div class="section-card">
-        <p><b>Roleplay Question!</b> Reply in the character you plan on playing in the event.</p>
-        <div class="field-group">
-          <label>The Traitor</label>
-          <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
-        </div>
-      </div>
-      <button type="submit">Submit Application</button>
-    </form>
-
-    <!-- VIDEO FORM -->
-    <form id="videoForm" style="display:none;">
-
-      <div class="reference-box">
-        <p>📋 Cover these topics in your video</p>
-        <ol>
-          <li>Tell us about yourself</li>
-          <li>What are your plans for the event?</li>
-          <li>Previous civ event experience?</li>
-          <li><b>Roleplay:</b> Your captain asks you to throw a friend to the sharks for stealing treasure — what do you do? (answer in character)</li>
-        </ol>
-      </div>
-
-      <div class="field-group">
-        <label>Minecraft IGN</label>
-        <input name="ign" placeholder="Your in-game name" required>
-      </div>
-      <div class="field-group">
-        <label>Discord Username</label>
-        <input name="discordName" id="discordNameVideo" placeholder="Discord Username" readonly required>
-      </div>
-      <div class="field-group">
-        <label>Video Link</label>
-        <input name="videoLink" placeholder="Paste your video link here" required>
-      </div>
-      <button type="submit">Submit Video Application</button>
-    </form>
-
-    <div id="thankYouMessage" style="display:none;">
-      <h2>Thank you for applying for Sarkovia Events!</h2>
-      <p>You'll hear news about your application shortly.</p>
-    </div>
-
-    <div id="alreadyAppliedMessage" style="display:none;">
-      <h2>Already Applied</h2>
-      <p>You've already submitted an application with this Discord account.</p>
+    <div class="fade-in" style="animation-delay:0.7s;">
+      <a href="/login">
+        <button>Login with Discord</button>
+      </a>
     </div>
   </div>
 
 </div>
-
-<script>
-const splash = document.getElementById("splash");
-const splashVideo = document.getElementById("splashVideo");
-
-function dismissSplash() {
-  splash.classList.add("fade-out");
-  setTimeout(() => splash.remove(), 1400);
-}
-
-if (localStorage.getItem("splashSeen")) {
-  splash.remove();
-} else {
-  localStorage.setItem("splashSeen", "1");
-  splashVideo.addEventListener("ended", dismissSplash);
-  splashVideo.addEventListener("error", () => splash.remove());
-  setTimeout(dismissSplash, 15000);
-}
-
-function switchType(type) {
-  const written = document.getElementById("writtenForm");
-  const video = document.getElementById("videoForm");
-  const btnW = document.getElementById("btnWritten");
-  const btnV = document.getElementById("btnVideo");
-  if (type === "written") {
-    written.style.display = "block";
-    video.style.display = "none";
-    btnW.classList.add("active");
-    btnV.classList.remove("active");
-  } else {
-    written.style.display = "none";
-    video.style.display = "block";
-    btnV.classList.add("active");
-    btnW.classList.remove("active");
-  }
-}
-
-async function init() {
-  const res = await fetch("/user");
-  const user = await res.json();
-
-  const loginPage = document.getElementById("loginPage");
-  const appPage = document.getElementById("appPage");
-
-  if (!user) {
-    loginPage.style.display = "block";
-    appPage.style.display = "none";
-    return;
-  }
-
-  loginPage.style.display = "none";
-  appPage.style.display = "block";
-
-  let displayName = "Unknown User";
-  if (user.global_name) displayName = user.global_name;
-  else if (user.username && user.discriminator && user.discriminator !== "0")
-    displayName = `${user.username}#${user.discriminator}`;
-  else if (user.username) displayName = user.username;
-
-  document.getElementById("username").innerText = displayName;
-  document.getElementById("discordNameWritten").value = displayName;
-  document.getElementById("discordNameVideo").value = displayName;
-
-  document.getElementById("writtenForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target).entries());
-    const r = await fetch("/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    if (r.status === 409) showMsg("alreadyAppliedMessage");
-    else if (!r.ok) alert("Submission failed: " + await r.text());
-    else showMsg("thankYouMessage");
-  });
-
-  document.getElementById("videoForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target).entries());
-    const r = await fetch("/submit-video", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    if (r.status === 409) showMsg("alreadyAppliedMessage");
-    else if (!r.ok) alert("Submission failed: " + await r.text());
-    else showMsg("thankYouMessage");
-  });
-}
-
-function showMsg(id) {
-  document.getElementById("writtenForm").style.display = "none";
-  document.getElementById("videoForm").style.display = "none";
-  document.querySelector(".type-choice").style.display = "none";
-  document.getElementById("appTypeLabel").style.display = "none";
-  document.getElementById(id).style.display = "block";
-}
-
-init();
-</script>
 
 <a href="https://discord.gg/sarkovia" target="_blank" class="discord-badge" title="Join our Discord">
   <img src="/sarkovialogo.png" alt="Sarkovia Discord">
