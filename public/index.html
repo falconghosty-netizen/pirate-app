@@ -288,6 +288,114 @@
       font-family: 'Cinzel', serif; font-size: 0.75rem;
       letter-spacing: 1px; color: var(--parchment-tan); margin: 4px 0 14px; text-align: center;
     }
+
+    /* ===== STAFF PAGE ===== */
+    #staffPage {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      overflow-y: auto;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #staffPage.visible { opacity: 1; }
+
+    .staff-board-bg {
+      min-height: 100vh;
+      background: url("woodenboard.png") center center / cover;
+      padding: 50px 30px 60px;
+      position: relative;
+    }
+    .staff-board-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(10, 4, 0, 0.45);
+      pointer-events: none;
+    }
+    .staff-board-inner {
+      position: relative;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .staff-board-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 2rem; font-weight: 900;
+      color: var(--parchment-gold);
+      text-align: center; margin: 0 0 10px;
+      text-shadow: 0 0 30px rgba(212,168,67,0.5), 2px 2px 0 rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);
+      letter-spacing: 2px;
+    }
+    .staff-board-sub {
+      font-family: 'Cinzel', serif; font-size: 0.75rem;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: var(--parchment-tan); text-align: center; margin: 0 0 40px; opacity: 0.8;
+    }
+    .staff-row {
+      display: flex; justify-content: center;
+      gap: 20px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .wanted-poster {
+      width: 180px; flex-shrink: 0;
+      transition: transform 0.25s ease, filter 0.25s ease;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.7));
+      cursor: default;
+    }
+    .wanted-poster:hover {
+      transform: translateY(-8px) rotate(-1deg) scale(1.04);
+      filter: drop-shadow(0 14px 28px rgba(0,0,0,0.8));
+    }
+    .wanted-poster img { width: 100%; display: block; border-radius: 2px; }
+    .wanted-poster::before {
+      content: '';
+      display: block; width: 14px; height: 14px;
+      background: radial-gradient(circle at 40% 35%, #aaa, #555 60%, #222);
+      border-radius: 50%; margin: 0 auto 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    }
+    .staff-back-btn {
+      display: block; margin: 30px auto 0;
+      width: fit-content; padding: 14px 40px;
+      font-family: 'Cinzel', serif; font-size: 0.8rem;
+      font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      color: var(--parchment-gold); border: 1px solid var(--parchment-tan);
+      border-radius: 3px; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .staff-back-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
+      border-color: var(--parchment-gold);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(212,168,67,0.15);
+    }
+
+    /* ===== FLOATING STAFF BUTTON ===== */
+    .staff-float-btn {
+      position: fixed;
+      top: 18px; right: 18px;
+      z-index: 400;
+      padding: 10px 18px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      color: var(--parchment-gold);
+      border: 1px solid var(--parchment-tan);
+      border-radius: 3px; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+    .staff-float-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
+      border-color: var(--parchment-gold);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(212,168,67,0.15);
+    }
   </style>
 </head>
 
@@ -301,6 +409,8 @@
 </div>
 
 <div class="bg-effects"></div>
+
+<button class="staff-float-btn" onclick="openStaff()">⚓ Meet the Staff</button>
 
 <div class="container">
   <span class="corner-bl">✦</span>
@@ -530,11 +640,52 @@ async function init() {
 }
 
 init();
+
+// ===== STAFF PAGE =====
+function openStaff() {
+  const p = document.getElementById('staffPage');
+  p.style.display = 'block';
+  requestAnimationFrame(() => p.classList.add('visible'));
+}
+function closeStaff() {
+  const p = document.getElementById('staffPage');
+  p.classList.remove('visible');
+  setTimeout(() => { p.style.display = 'none'; }, 500);
+}
 </script>
 
 <a href="https://discord.gg/sarkovia" target="_blank" class="discord-badge" title="Join our Discord">
   <img src="/sarkovialogo.png" alt="Sarkovia Discord">
 </a>
+
+<!-- ===== STAFF PAGE ===== -->
+<div id="staffPage">
+  <div class="staff-board-bg">
+    <div class="staff-board-inner">
+      <h1 class="staff-board-title">⚓ The Crew ⚓</h1>
+      <p class="staff-board-sub">— Sarkovia Event Staff —</p>
+
+      <!-- Row 1: Omerone, Aether, OzR, Zoro -->
+      <div class="staff-row">
+        <div class="wanted-poster"><img src="/omerone.png" alt="Omerone"></div>
+        <div class="wanted-poster"><img src="/aether.png"  alt="TheAether"></div>
+        <div class="wanted-poster"><img src="/ozr.png"     alt="OzR"></div>
+        <div class="wanted-poster"><img src="/zoro.png"    alt="Zoro"></div>
+      </div>
+
+      <!-- Row 2: Falcon, Arti, Raindrop, Iryth, Qalius -->
+      <div class="staff-row">
+        <div class="wanted-poster"><img src="/falcon.png"   alt="FalconGhosty"></div>
+        <div class="wanted-poster"><img src="/art.png"      alt="Artifabrian"></div>
+        <div class="wanted-poster"><img src="/raindrop.png" alt="Raindrop"></div>
+        <div class="wanted-poster"><img src="/iryth.png"    alt="Iryth"></div>
+        <div class="wanted-poster"><img src="/qalius.png"   alt="Qalius"></div>
+      </div>
+
+      <button class="staff-back-btn" onclick="closeStaff()">← Return to Port</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
