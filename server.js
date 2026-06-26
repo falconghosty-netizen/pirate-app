@@ -1,9 +1,21 @@
-const { sendApplication, sendVideoApplication } = require("./bot");
 const express = require("express");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 const path = require("path");
+const fs = require("fs");
 const fetch = require("node-fetch");
 require("dotenv").config();
+
+const pool = require("./db");
+const { assignAcceptedRole } = require("./discordRest");
+const {
+  hashPassword,
+  verifyPassword,
+  getAdminById,
+  getAdminByUsername,
+  requireAdmin,
+  requireOwner
+} = require("./auth");
 
 const app = express();
 
@@ -12,10 +24,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "secret123",
+  store: new pgSession({
+    pool,
+    tableName: "user_sessions",
+    createTableIfMissing: true
+  }),
+  secret: process.env.SESSION_SECRET || "change-this-secret",
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 * 30 } // 30 days
 }));
 
 // ===== ENV =====
@@ -26,24 +43,30 @@ const REDIRECT_URI = process.env.REDIRECT_URI;
 console.log("ENV CHECK:", {
   CLIENT_ID: !!CLIENT_ID,
   CLIENT_SECRET: !!CLIENT_SECRET,
-  REDIRECT_URI
+  REDIRECT_URI,
+  DATABASE_URL: !!process.env.DATABASE_URL,
+  BOT_TOKEN: !!process.env.BOT_TOKEN,
+  GUILD_ID: !!process.env.GUILD_ID,
+  ADMIN_SETUP_KEY: !!process.env.ADMIN_SETUP_KEY,
+  SESSION_SECRET: !!process.env.SESSION_SECRET
 });
 
 // ===== STATIC FILES =====
 app.use(express.static(path.join(__dirname, "public")));
 
-// ===== HOME =====
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// ===== PAGE ROUTES =====
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
+app.get("/staff", (req, res) => res.sendFile(path.join(__dirname, "public", "staff.html")));
+app.get("/admin/setup", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-setup.html")));
+app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
+app.get("/admin/signup", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-signup.html")));
 
-// ===== LOGIN =====
+// ===== DISCORD OAUTH (applicants) =====
 app.get("/login", (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
 });
 
-// ===== CALLBACK =====
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.send("No code received");
@@ -78,12 +101,10 @@ app.get("/callback", async (req, res) => {
   }
 });
 
-// ===== USER CHECK =====
 app.get("/user", (req, res) => {
   res.json(req.session.user || null);
 });
 
-// ===== LOGOUT =====
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
@@ -94,28 +115,46 @@ function truncate(str, max = 1024) {
   return str.length > max ? str.slice(0, max - 3) + "..." : str;
 }
 
+async function alreadyApplied(discordId) {
+  const { rows } = await pool.query(
+    "SELECT 1 FROM applications WHERE discord_id = $1 LIMIT 1",
+    [discordId]
+  );
+  return rows.length > 0;
+}
+
+function generateInviteCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
+  const block = (n) =>
+    Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `SARK-${block(4)}-${block(4)}`;
+}
+
 // ===== SUBMIT (written) =====
 app.post("/submit", async (req, res) => {
   try {
     const user = req.session.user;
     if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
 
+    if (await alreadyApplied(user.id)) {
+      return res.status(409).json({ error: "Already applied" });
+    }
+
     const { ign, about, plans, experience, rp2 } = req.body;
 
-    const fields = [
-      { name: "About", value: truncate(about) },
-      { name: "Plans", value: truncate(plans) },
-      { name: "Experience", value: truncate(experience) },
-      { name: "RP — The Traitor", value: truncate(rp2) }
-    ];
-
-    await sendApplication({
-      ign: ign || "N/A",
-      discord: user.username || "N/A",
-      userId: user.id,
-      fields,
-      channelId: process.env.CHANNEL_ID
-    });
+    await pool.query(
+      `INSERT INTO applications (discord_id, discord_username, ign, type, about, plans, experience, rp2)
+       VALUES ($1, $2, $3, 'written', $4, $5, $6, $7)`,
+      [
+        user.id,
+        user.username,
+        ign || "N/A",
+        truncate(about),
+        truncate(plans),
+        truncate(experience),
+        truncate(rp2)
+      ]
+    );
 
     res.json({ success: true });
   } catch (err) {
@@ -124,21 +163,23 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-// ===== SUBMIT VIDEO =====
+// ===== SUBMIT (video) =====
 app.post("/submit-video", async (req, res) => {
   try {
     const user = req.session.user;
     if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
 
+    if (await alreadyApplied(user.id)) {
+      return res.status(409).json({ error: "Already applied" });
+    }
+
     const { ign, videoLink } = req.body;
 
-    await sendVideoApplication({
-      ign: ign || "N/A",
-      discord: user.username || "N/A",
-      userId: user.id,
-      videoLink: videoLink || "N/A",
-      channelId: process.env.CHANNEL_ID  // same channel as written apps
-    });
+    await pool.query(
+      `INSERT INTO applications (discord_id, discord_username, ign, type, video_link)
+       VALUES ($1, $2, $3, 'video', $4)`,
+      [user.id, user.username, ign || "N/A", videoLink || "N/A"]
+    );
 
     res.json({ success: true });
   } catch (err) {
@@ -147,9 +188,308 @@ app.post("/submit-video", async (req, res) => {
   }
 });
 
-// ===== START SERVER =====
+// =========================================================
+// ===== ADMIN ACCOUNTS (username/password, not Discord) =====
+// =========================================================
+
+// One-time bootstrap: creates the very first ('owner') account.
+// Only works while the admins table is empty.
+app.post("/api/admin/setup", async (req, res) => {
+  try {
+    const { setupKey, username, password } = req.body;
+
+    if (!setupKey || setupKey !== process.env.ADMIN_SETUP_KEY) {
+      return res.status(403).json({ error: "Invalid setup key" });
+    }
+
+    const { rows } = await pool.query("SELECT COUNT(*) FROM admins");
+    if (parseInt(rows[0].count, 10) > 0) {
+      return res.status(409).json({
+        error: "An owner account already exists. Ask them for an invite code instead."
+      });
+    }
+
+    if (!username || !password || password.length < 8) {
+      return res.status(400).json({ error: "Username required, password must be at least 8 characters." });
+    }
+
+    const existing = await getAdminByUsername(username);
+    if (existing) return res.status(409).json({ error: "Username already taken." });
+
+    const hash = await hashPassword(password);
+    const { rows: inserted } = await pool.query(
+      `INSERT INTO admins (username, password_hash, role) VALUES ($1, $2, 'owner')
+       RETURNING id, username, role`,
+      [username, hash]
+    );
+
+    req.session.adminId = inserted[0].id;
+    res.json({ success: true, admin: inserted[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Setup failed" });
+  }
+});
+
+// Staff redeem an invite code to create their own account.
+app.post("/api/admin/signup", async (req, res) => {
+  try {
+    const { code, username, password } = req.body;
+    if (!code || !username || !password || password.length < 8) {
+      return res.status(400).json({ error: "All fields required, password must be at least 8 characters." });
+    }
+
+    const { rows: codeRows } = await pool.query(
+      "SELECT * FROM admin_invite_codes WHERE code = $1 AND used_at IS NULL",
+      [code.trim().toUpperCase()]
+    );
+    if (!codeRows.length) {
+      return res.status(400).json({ error: "Invalid or already-used invite code." });
+    }
+
+    const existing = await getAdminByUsername(username);
+    if (existing) return res.status(409).json({ error: "Username already taken." });
+
+    const hash = await hashPassword(password);
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const { rows: inserted } = await client.query(
+        `INSERT INTO admins (username, password_hash, role) VALUES ($1, $2, 'staff')
+         RETURNING id, username, role`,
+        [username, hash]
+      );
+
+      await client.query(
+        "UPDATE admin_invite_codes SET used_at = now(), used_by = $1 WHERE id = $2",
+        [username, codeRows[0].id]
+      );
+
+      await client.query("COMMIT");
+
+      req.session.adminId = inserted[0].id;
+      res.json({ success: true, admin: inserted[0] });
+    } catch (e) {
+      await client.query("ROLLBACK");
+      throw e;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+// Login
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const admin = await getAdminByUsername(username || "");
+    if (!admin) return res.status(401).json({ error: "Invalid username or password." });
+
+    const valid = await verifyPassword(password || "", admin.password_hash);
+    if (!valid) return res.status(401).json({ error: "Invalid username or password." });
+
+    req.session.adminId = admin.id;
+    res.json({ success: true, admin: { username: admin.username, role: admin.role } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+app.post("/api/admin/logout", (req, res) => {
+  req.session.destroy(() => res.json({ success: true }));
+});
+
+app.get("/api/admin/me", async (req, res) => {
+  if (!req.session.adminId) return res.json({ loggedIn: false });
+  const admin = await getAdminById(req.session.adminId);
+  if (!admin) return res.json({ loggedIn: false });
+  res.json({ loggedIn: true, username: admin.username, role: admin.role, isOwner: admin.role === "owner" });
+});
+
+// Owner: generate a new invite code
+app.post("/api/admin/generate-code", requireOwner, async (req, res) => {
+  try {
+    const code = generateInviteCode();
+    await pool.query("INSERT INTO admin_invite_codes (code) VALUES ($1)", [code]);
+    res.json({ success: true, code });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to generate code" });
+  }
+});
+
+// Owner: view invite code history (used / unused)
+app.get("/api/admin/invite-codes", requireOwner, async (req, res) => {
+  const { rows } = await pool.query(
+    "SELECT code, created_at, used_at, used_by FROM admin_invite_codes ORDER BY created_at DESC"
+  );
+  res.json({ codes: rows });
+});
+
+// Owner: wipe all applications + ratings (admin accounts untouched)
+app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
+  try {
+    const { confirmation } = req.body;
+    if (confirmation !== "DELETE ALL APPLICATIONS") {
+      return res.status(400).json({ error: "Confirmation phrase did not match." });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM ratings");
+      await client.query("DELETE FROM applications");
+      await client.query("ALTER SEQUENCE applications_id_seq RESTART WITH 1");
+      await client.query("ALTER SEQUENCE ratings_id_seq RESTART WITH 1");
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK");
+      throw e;
+    } finally {
+      client.release();
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to clear applications" });
+  }
+});
+
+// =========================================================
+// ===== STAFF DASHBOARD API (requires admin login) =====
+// =========================================================
+
+app.get("/api/staff/applications", requireAdmin, async (req, res) => {
+  try {
+    const status = req.query.status || "pending"; // pending | accepted | denied | all
+    const type = req.query.type || "all"; // written | video | all
+    const rated = req.query.rated; // "yes" | "no" | undefined
+
+    let query = `
+      SELECT
+        a.id, a.type, a.status, a.submitted_at, a.decided_by, a.decided_at,
+        CASE WHEN a.status = 'pending' THEN NULL ELSE a.ign END AS ign,
+        CASE WHEN a.status = 'pending' THEN NULL ELSE a.discord_username END AS discord_username,
+        a.about, a.plans, a.experience, a.rp2, a.video_link,
+        COALESCE(r.avg_score, 0)::float AS avg_score,
+        COALESCE(r.rating_count, 0)::int AS rating_count,
+        ur.score AS my_score
+      FROM applications a
+      LEFT JOIN (
+        SELECT application_id, AVG(score) AS avg_score, COUNT(*) AS rating_count
+        FROM ratings
+        GROUP BY application_id
+      ) r ON r.application_id = a.id
+      LEFT JOIN ratings ur ON ur.application_id = a.id AND ur.staff_id = $1
+      WHERE 1=1
+    `;
+    const params = [String(req.admin.id)];
+
+    if (status !== "all") {
+      params.push(status);
+      query += ` AND a.status = $${params.length}`;
+    }
+    if (type !== "all") {
+      params.push(type);
+      query += ` AND a.type = $${params.length}`;
+    }
+    if (rated === "yes") query += ` AND ur.score IS NOT NULL`;
+    if (rated === "no") query += ` AND ur.score IS NULL`;
+
+    query += ` ORDER BY a.submitted_at ASC`;
+
+    const { rows } = await pool.query(query, params);
+    res.json({ applications: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load applications" });
+  }
+});
+
+app.post("/api/staff/rate", requireAdmin, async (req, res) => {
+  try {
+    const { applicationId, score } = req.body;
+    const s = parseInt(score, 10);
+
+    if (!applicationId || isNaN(s) || s < 1 || s > 10) {
+      return res.status(400).json({ error: "Score must be a number between 1 and 10" });
+    }
+
+    await pool.query(
+      `INSERT INTO ratings (application_id, staff_id, staff_username, score)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (application_id, staff_id)
+       DO UPDATE SET score = EXCLUDED.score, rated_at = now()`,
+      [applicationId, String(req.admin.id), req.admin.username, s]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save rating" });
+  }
+});
+
+app.post("/api/staff/decide", requireAdmin, async (req, res) => {
+  try {
+    const { applicationId, decision } = req.body;
+    if (!["accept", "deny"].includes(decision)) {
+      return res.status(400).json({ error: "Invalid decision" });
+    }
+
+    const { rows } = await pool.query("SELECT * FROM applications WHERE id = $1", [applicationId]);
+    const application = rows[0];
+    if (!application) return res.status(404).json({ error: "Application not found" });
+
+    const newStatus = decision === "accept" ? "accepted" : "denied";
+
+    await pool.query(
+      `UPDATE applications SET status = $1, decided_by = $2, decided_at = now() WHERE id = $3`,
+      [newStatus, req.admin.username, applicationId]
+    );
+
+    if (decision === "accept") {
+      try {
+        await assignAcceptedRole(application.discord_id);
+      } catch (roleErr) {
+        console.error("Role assignment failed:", roleErr);
+        return res.json({
+          success: true,
+          warning: "Status updated, but assigning the Discord role failed. Check bot permissions."
+        });
+      }
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update decision" });
+  }
+});
+
+// ===== DB INIT + START =====
+async function initDb() {
+  const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
+  await pool.query(schema);
+  console.log("Database schema ready.");
+}
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
-});
+initDb()
+  .then(() => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log("Server running on port", PORT);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to initialize database:", err);
+    process.exit(1);
+  });

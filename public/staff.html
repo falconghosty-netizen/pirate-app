@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/sarkovialogo.png">
+  <link rel="stylesheet" href="/admin-theme.css">
+
+  <style>
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    header h1 {
+      font-size: 1.05rem;
+      margin: 0;
+      color: var(--text);
+    }
+    header .right { display: flex; align-items: center; gap: 14px; }
+    header .user { font-size: 0.85rem; color: var(--text-dim); }
+    header button.logout {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    header button.logout:hover { border-color: var(--red); color: var(--red); }
+
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+
+    #accessMsg {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 80px 20px;
+      font-size: 0.95rem;
+    }
+
+    .owner-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    .owner-panel h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .owner-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .code-box {
+      display: none;
+      background: var(--panel-alt);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .code-list { margin-top: 14px; max-height: 140px; overflow-y: auto; }
+    .code-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .code-row code { color: var(--text); }
+    .code-row .used { color: var(--text-dim); }
+    .code-row .unused { color: var(--green); }
+
+    .danger-zone {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .danger-zone p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin: 0 0 10px;
+    }
+    button.danger {
+      background: rgba(224,97,92,0.12);
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.danger:hover { background: rgba(224,97,92,0.22); }
+
+    .tabs, .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .tab-btn, .filter-btn, .sort-btn {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active, .filter-btn.active {
+      background: var(--accent);
+      color: #0c1320;
+      border-color: var(--accent);
+    }
+    .tab-btn:hover, .filter-btn:hover, .sort-btn:hover { border-color: var(--accent); }
+    .sort-btn { margin-bottom: 20px; }
+
+    #loadingMsg, #emptyMsg {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 60px 20px;
+      font-size: 0.95rem;
+    }
+
+    .group-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin: 24px 0 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .card-id { display: flex; align-items: center; gap: 10px; }
+    .type-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      color: white;
+      white-space: nowrap;
+    }
+    .type-badge.written { background: #5865F2; }
+    .type-badge.video { background: #E67E22; }
+
+    .card-id .ign { font-weight: 700; color: var(--text); font-size: 1rem; }
+    .card-id .ign.hidden-id { color: var(--text-dim); font-weight: 500; font-style: italic; font-size: 0.85rem; }
+    .card-id .discord { color: var(--text-dim); font-size: 0.85rem; }
+
+    .score-pill {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .field-row { margin-bottom: 12px; }
+    .field-row label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .field-row p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--text); white-space: pre-wrap; }
+    .field-row a { color: var(--accent); word-break: break-all; }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .rate-input {
+      width: 56px;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--text);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    button.action {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--panel-alt);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    button.action:hover { border-color: var(--accent); }
+    button.action.rate { background: var(--accent); color: #0c1320; border-color: var(--accent); }
+    button.action.accept { background: var(--green); color: #08190f; border-color: var(--green); }
+    button.action.deny { background: var(--red); color: #240a08; border-color: var(--red); }
+
+    .meta-line { font-size: 0.72rem; color: var(--text-dim); margin-top: 10px; }
+
+    .status-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .status-tag.accepted { background: rgba(76,175,125,0.15); color: var(--green); }
+    .status-tag.denied { background: rgba(224,97,92,0.15); color: var(--red); }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Staff Dashboard</h1>
+  <div class="right">
+    <span class="user" id="userLabel"></span>
+    <button class="logout" id="logoutBtn" style="display:none;">Log out</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="accessMsg" style="display:none;"></div>
+
+  <div id="dashboard" style="display:none;">
+
+    <div class="owner-panel" id="ownerPanel" style="display:none;">
+      <h2>Owner Tools</h2>
+      <div class="owner-row">
+        <button class="tab-btn" id="genCodeBtn">Generate Invite Code</button>
+        <div class="code-box" id="newCodeBox"></div>
+      </div>
+      <div class="code-list" id="codeList"></div>
+
+      <div class="danger-zone">
+        <p>Wiping applications permanently deletes all applications and ratings. Admin accounts and invite codes are not affected. This cannot be undone.</p>
+        <button class="danger" id="clearBtn">Wipe All Applications</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-status="pending">Pending</button>
+      <button class="tab-btn" data-status="accepted">Accepted</button>
+      <button class="tab-btn" data-status="denied">Denied</button>
+      <button class="tab-btn" data-status="all">All</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-type="all">All Types</button>
+      <button class="filter-btn" data-type="written">Written</button>
+      <button class="filter-btn" data-type="video">Video</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-rated="all">All</button>
+      <button class="filter-btn" data-rated="no">To Rate</button>
+      <button class="filter-btn" data-rated="yes">Rated</button>
+    </div>
+
+    <button class="sort-btn" id="sortBtn">Sort by Rating (High → Low)</button>
+
+    <div id="loadingMsg">Loading applications…</div>
+    <div id="emptyMsg" style="display:none;">No applications here.</div>
+    <div id="list"></div>
+  </div>
+
+</div>
+
+<script>
+let currentStatus = "pending";
+let currentType = "all";
+let currentRated = "all";
+let sortedView = false;
+let lastApps = [];
+
+async function init() {
+  const res = await fetch("/api/admin/me");
+  const me = await res.json();
+
+  if (!me.loggedIn) {
+    document.getElementById("accessMsg").style.display = "block";
+    document.getElementById("accessMsg").innerHTML =
+      `Please <a href="/admin/login">log in</a> to continue.`;
+    return;
+  }
+
+  document.getElementById("userLabel").textContent = `${me.username} (${me.role})`;
+  document.getElementById("logoutBtn").style.display = "inline-block";
+  document.getElementById("dashboard").style.display = "block";
+
+  if (me.isOwner) {
+    document.getElementById("ownerPanel").style.display = "block";
+    loadInviteCodes();
+  }
+
+  loadApplications();
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await fetch("/api/admin/logout", { method: "POST" });
+  window.location.href = "/admin/login";
+});
+
+document.querySelectorAll("[data-status]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-status]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentStatus = btn.dataset.status;
+    sortedView = false;
+    loadApplications();
+  });
+});
+
+document.querySelectorAll("[data-type]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-type]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentType = btn.dataset.type;
+    sortedView = false;
+    loadApplications();
+  });
+});
+
+document.querySelectorAll("[data-rated]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-rated]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentRated = btn.dataset.rated;
+    sortedView = false;
+    loadApplications();
+  });
+});
+
+document.getElementById("sortBtn").addEventListener("click", () => {
+  if (!confirm("Are you sure you want to sort? This groups applications by type (written / video) and orders each group by average rating, high to low.")) return;
+  sortedView = true;
+  renderList(lastApps);
+});
+
+document.getElementById("genCodeBtn").addEventListener("click", async () => {
+  const res = await fetch("/api/admin/generate-code", { method: "POST" });
+  const data = await res.json();
+  if (!res.ok) { alert(data.error || "Failed to generate code"); return; }
+
+  const box = document.getElementById("newCodeBox");
+  box.textContent = data.code;
+  box.style.display = "inline-block";
+  loadInviteCodes();
+});
+
+document.getElementById("clearBtn").addEventListener("click", async () => {
+  if (!confirm("This will permanently delete ALL applications and ratings. Admin accounts are NOT affected. Continue?")) return;
+
+  const phrase = prompt('Type "DELETE ALL APPLICATIONS" exactly to confirm:');
+  if (phrase !== "DELETE ALL APPLICATIONS") {
+    alert("Phrase didn't match — nothing was deleted.");
+    return;
+  }
+
+  const res = await fetch("/api/admin/clear-apps", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirmation: phrase })
+  });
+  const data = await res.json();
+
+  if (!res.ok) { alert("Failed: " + (data.error || "unknown error")); return; }
+
+  alert("All applications and ratings have been cleared.");
+  loadApplications();
+});
+
+async function loadInviteCodes() {
+  const res = await fetch("/api/admin/invite-codes");
+  if (!res.ok) return;
+  const data = await res.json();
+  document.getElementById("codeList").innerHTML = data.codes.map(c => `
+    <div class="code-row">
+      <code>${c.code}</code>
+      <span class="${c.used_at ? 'used' : 'unused'}">${c.used_at ? 'Used by ' + escapeHtml(c.used_by) : 'Unused'}</span>
+    </div>
+  `).join("");
+}
+
+async function loadApplications() {
+  const list = document.getElementById("list");
+  const loading = document.getElementById("loadingMsg");
+  const empty = document.getElementById("emptyMsg");
+
+  loading.style.display = "block";
+  empty.style.display = "none";
+  list.innerHTML = "";
+
+  let url = `/api/staff/applications?status=${currentStatus}&type=${currentType}`;
+  if (currentRated !== "all") url += `&rated=${currentRated}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  loading.style.display = "none";
+
+  lastApps = data.applications || [];
+
+  if (!lastApps.length) {
+    empty.style.display = "block";
+    return;
+  }
+
+  renderList(lastApps);
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderList(apps) {
+  const list = document.getElementById("list");
+
+  if (sortedView) {
+    const written = apps.filter(a => a.type === "written").sort((a, b) => b.avg_score - a.avg_score);
+    const video = apps.filter(a => a.type === "video").sort((a, b) => b.avg_score - a.avg_score);
+
+    list.innerHTML = `
+      <div class="group-title">Written — sorted by rating</div>
+      ${written.length ? written.map(renderCard).join("") : '<p class="meta-line">None</p>'}
+      <div class="group-title">Video — sorted by rating</div>
+      ${video.length ? video.map(renderCard).join("") : '<p class="meta-line">None</p>'}
+    `;
+  } else {
+    list.innerHTML = apps.map(renderCard).join("");
+  }
+
+  wireCardButtons();
+}
+
+function wireCardButtons() {
+  document.querySelectorAll("[data-rate]").forEach(btn => {
+    btn.addEventListener("click", () => submitRating(btn.dataset.rate));
+  });
+  document.querySelectorAll("[data-decide]").forEach(btn => {
+    btn.addEventListener("click", () => decide(btn.dataset.decide, btn.dataset.decision));
+  });
+}
+
+function renderCard(app) {
+  const isWritten = app.type === "written";
+  const submitted = new Date(app.submitted_at).toLocaleString();
+
+  const statusTag = app.status !== "pending"
+    ? `<span class="status-tag ${app.status}">${app.status}</span>`
+    : "";
+
+  const ignDisplay = app.ign !== null
+    ? `<span class="ign">${escapeHtml(app.ign)} ${statusTag}</span>`
+    : `<span class="ign hidden-id">🔒 Hidden until decided ${statusTag}</span>`;
+  const discordDisplay = app.discord_username !== null
+    ? `<span class="discord">@${escapeHtml(app.discord_username)}</span>`
+    : `<span class="discord">🔒 Hidden until decided</span>`;
+
+  const fieldsHtml = isWritten ? `
+    <div class="field-row"><label>About</label><p>${escapeHtml(app.about)}</p></div>
+    <div class="field-row"><label>Plans</label><p>${escapeHtml(app.plans)}</p></div>
+    <div class="field-row"><label>Experience</label><p>${escapeHtml(app.experience)}</p></div>
+    <div class="field-row"><label>RP — The Traitor</label><p>${escapeHtml(app.rp2)}</p></div>
+  ` : `
+    <div class="field-row"><label>Video Link</label><p><a href="${escapeHtml(app.video_link)}" target="_blank">${escapeHtml(app.video_link)}</a></p></div>
+  `;
+
+  const actionsHtml = app.status === "pending" ? `
+    <input type="number" min="1" max="10" class="rate-input" id="rate-${app.id}" placeholder="${app.my_score ?? '–'}">
+    <button class="action rate" data-rate="${app.id}">${app.my_score ? "Update Rating" : "Rate"}</button>
+    <button class="action accept" data-decide="${app.id}" data-decision="accept">Accept</button>
+    <button class="action deny" data-decide="${app.id}" data-decision="deny">Deny</button>
+  ` : `
+    <span class="meta-line">Decided by ${escapeHtml(app.decided_by)} on ${new Date(app.decided_at).toLocaleString()}</span>
+  `;
+
+  return `
+    <div class="card" id="card-${app.id}">
+      <div class="card-top">
+        <div class="card-id">
+          <span class="type-badge ${app.type}">${isWritten ? "Written" : "Video"}</span>
+          <div>
+            <div>${ignDisplay}</div>
+            <div>${discordDisplay}</div>
+          </div>
+        </div>
+        <div class="score-pill">⭐ ${Number(app.avg_score).toFixed(1)}/10 (${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""})</div>
+      </div>
+
+      ${fieldsHtml}
+
+      <div class="card-actions">
+        ${actionsHtml}
+      </div>
+      <div class="meta-line">Submitted ${submitted}</div>
+    </div>
+  `;
+}
+
+async function submitRating(applicationId) {
+  const input = document.getElementById(`rate-${applicationId}`);
+  const score = parseInt(input.value, 10);
+
+  if (isNaN(score) || score < 1 || score > 10) {
+    alert("Enter a score between 1 and 10.");
+    return;
+  }
+
+  const res = await fetch("/api/staff/rate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ applicationId, score })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    alert("Failed to rate: " + (err.error || "unknown error"));
+    return;
+  }
+
+  loadApplications();
+}
+
+async function decide(applicationId, decision) {
+  if (!confirm(`Are you sure you want to ${decision} this application?`)) return;
+
+  const res = await fetch("/api/staff/decide", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ applicationId, decision })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert("Failed: " + (data.error || "unknown error"));
+    return;
+  }
+  if (data.warning) alert(data.warning);
+
+  loadApplications();
+}
+
+init();
+</script>
+
+</body>
+</html>

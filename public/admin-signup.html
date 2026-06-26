@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Staff Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/admin-theme.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Create Staff Account</h1>
+    <p class="sub">Enter the invite code you were given.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="signupForm">
+      <div class="field">
+        <label>Invite Code</label>
+        <input type="text" id="code" placeholder="SARK-XXXX-XXXX" required>
+      </div>
+      <div class="field">
+        <label>Choose a Username</label>
+        <input type="text" id="username" required>
+      </div>
+      <div class="field">
+        <label>Choose a Password</label>
+        <input type="password" id="password" required minlength="8">
+      </div>
+      <button type="submit" class="primary">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="/admin/login">Log in</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.style.display = "none";
+
+  const code = document.getElementById("code").value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/admin/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, username, password })
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    errorMsg.textContent = data.error || "Signup failed.";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  window.location.href = "/staff";
+});
+</script>
+
+</body>
+</html>

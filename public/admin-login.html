@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/admin-theme.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Staff Login</h1>
+    <p class="sub">Sign in with your admin account.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" required>
+      </div>
+      <button type="submit" class="primary">Log In</button>
+    </form>
+
+    <div class="auth-footer">
+      Have an invite code? <a href="/admin/signup">Create an account</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.style.display = "none";
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    errorMsg.textContent = data.error || "Login failed.";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  window.location.href = "/staff";
+});
+</script>
+
+</body>
+</html>

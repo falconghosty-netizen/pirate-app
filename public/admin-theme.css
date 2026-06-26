@@ -1,0 +1,124 @@
+:root {
+  --bg:         #14171c;
+  --panel:      #1b1f26;
+  --panel-alt:  #20242c;
+  --border:     #2c313b;
+  --text:       #e4e6eb;
+  --text-dim:   #8b93a1;
+  --accent:     #5b8cff;
+  --accent-dim: #3d5cb8;
+  --green:      #4caf7d;
+  --red:        #e0615c;
+  --amber:      #d9a55c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+
+.auth-card h1 {
+  font-size: 1.2rem;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.auth-card p.sub {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 0 24px;
+}
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+button.primary {
+  width: 100%;
+  padding: 11px;
+  border-radius: 7px;
+  border: none;
+  background: var(--accent);
+  color: #0c1320;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: 6px;
+}
+button.primary:hover { background: var(--accent-dim); color: #fff; }
+button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-msg {
+  background: rgba(224,97,92,0.12);
+  border: 1px solid rgba(224,97,92,0.35);
+  color: var(--red);
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.success-msg {
+  background: rgba(76,175,125,0.12);
+  border: 1px solid rgba(76,175,125,0.35);
+  color: var(--green);
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.auth-footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-top: 18px;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Owner Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/admin-theme.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Owner Account Setup</h1>
+    <p class="sub">One-time setup. Only works if no owner account exists yet.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <form id="setupForm">
+      <div class="field">
+        <label>Setup Key</label>
+        <input type="password" id="setupKey" required>
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" required minlength="8">
+      </div>
+      <button type="submit" class="primary">Create Owner Account</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="/admin/login">Log in</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("setupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorMsg = document.getElementById("errorMsg");
+  const successMsg = document.getElementById("successMsg");
+  errorMsg.style.display = "none";
+  successMsg.style.display = "none";
+
+  const setupKey = document.getElementById("setupKey").value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/admin/setup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ setupKey, username, password })
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    errorMsg.textContent = data.error || "Setup failed.";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  successMsg.textContent = "Owner account created. Redirecting…";
+  successMsg.style.display = "block";
+  setTimeout(() => window.location.href = "/staff", 800);
+});
+</script>
+
+</body>
+</html>
