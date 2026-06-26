@@ -317,56 +317,25 @@
       max-width: 1100px;
       margin: 0 auto;
     }
-    .staff-title-banner {
-      position: relative;
-      display: block;
-      text-align: center;
-      margin: 0 auto 40px;
-      padding: 22px 60px 18px;
-      background:
-        linear-gradient(160deg, #3d2205 0%, #221004 45%, #3a1e07 100%);
-      border-top: 3px solid var(--parchment-gold);
-      border-bottom: 3px solid var(--parchment-gold);
-      border-left: 1px solid rgba(212,168,67,0.35);
-      border-right: 1px solid rgba(212,168,67,0.35);
-      box-shadow:
-        0 0 0 1px rgba(212,168,67,0.18),
-        0 8px 40px rgba(0,0,0,0.85),
-        inset 0 0 50px rgba(0,0,0,0.4),
-        inset 0 1px 0 rgba(212,168,67,0.15);
-    }
-    .staff-title-banner::before,
-    .staff-title-banner::after {
-      content: '';
-      position: absolute;
-      width: 16px; height: 16px;
-      background: radial-gradient(circle at 38% 32%, #c8a84b, #7a5a1a 55%, #2a1a05);
-      border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,220,100,0.3);
-      top: -9px;
-    }
-    .staff-title-banner::before { left: 28px; }
-    .staff-title-banner::after  { right: 28px; }
-
     .staff-board-title {
       font-family: 'Cinzel Decorative', serif;
       font-size: 2rem; font-weight: 900;
       color: var(--parchment-gold);
-      text-align: center; margin: 0 0 6px;
+      text-align: center; margin: 0 0 10px;
       text-shadow: 0 0 30px rgba(212,168,67,0.5), 2px 2px 0 rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);
       letter-spacing: 2px;
     }
     .staff-board-sub {
       font-family: 'Cinzel', serif; font-size: 0.75rem;
       letter-spacing: 5px; text-transform: uppercase;
-      color: var(--parchment-tan); text-align: center; margin: 0; opacity: 0.8;
+      color: var(--parchment-tan); text-align: center; margin: 0 0 40px; opacity: 0.8;
     }
     .staff-row {
       display: flex; justify-content: center;
       gap: 20px; flex-wrap: wrap; margin-bottom: 24px;
     }
     .wanted-poster {
-      width: 240px; flex-shrink: 0;
+      width: 180px; flex-shrink: 0;
       transition: transform 0.25s ease, filter 0.25s ease;
       filter: drop-shadow(0 6px 18px rgba(0,0,0,0.7));
       cursor: default;
@@ -407,10 +376,10 @@
       position: fixed;
       top: 14px; right: 14px;
       z-index: 400;
-      padding: 10px 20px;
+      padding: 6px 12px;
       font-family: 'Cinzel', serif;
-      font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
       background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
       color: var(--parchment-gold);
       border: 1px solid var(--parchment-tan);
@@ -423,6 +392,32 @@
       margin: 0;
     }
     .staff-float-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
+      border-color: var(--parchment-gold);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,168,67,0.15);
+    }
+
+    .admin-float-btn {
+      position: fixed;
+      top: 14px; right: 150px;
+      z-index: 400;
+      padding: 6px 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      color: var(--parchment-gold);
+      border: 1px solid var(--parchment-tan);
+      border-radius: 3px; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .admin-float-btn:hover {
       transform: translateY(-2px);
       background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
       border-color: var(--parchment-gold);
@@ -443,6 +438,7 @@
 <div class="bg-effects"></div>
 
 <button class="staff-float-btn" onclick="openStaff()">⚓ Meet the Staff</button>
+<a href="/admin/login" class="admin-float-btn">🔑 Admin Login</a>
 
 <div class="container">
   <span class="corner-bl">✦</span>
@@ -694,10 +690,8 @@ function closeStaff() {
 <div id="staffPage">
   <div class="staff-board-bg">
     <div class="staff-board-inner">
-      <div class="staff-title-banner">
-        <h1 class="staff-board-title">⚓ The Crew ⚓</h1>
-        <p class="staff-board-sub">— Sarkovia Event Staff —</p>
-      </div>
+      <h1 class="staff-board-title">⚓ The Crew ⚓</h1>
+      <p class="staff-board-sub">— Sarkovia Event Staff —</p>
 
       <!-- Row 1: Omerone, Aether, OzR, Zoro -->
       <div class="staff-row">
