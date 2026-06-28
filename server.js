@@ -332,6 +332,32 @@ app.get("/api/admin/invite-codes", requireOwner, async (req, res) => {
   res.json({ codes: rows });
 });
 
+// Owner: list staff accounts
+app.get("/api/admin/staff-list", requireOwner, async (req, res) => {
+  const { rows } = await pool.query(
+    "SELECT id, username, role FROM admins WHERE role != 'owner' ORDER BY username ASC"
+  );
+  res.json({ staff: rows });
+});
+
+// Owner: remove a staff account
+app.post("/api/admin/remove-staff", requireOwner, async (req, res) => {
+  try {
+    const { staffId } = req.body;
+    if (!staffId) return res.status(400).json({ error: "staffId required" });
+
+    const { rows } = await pool.query("SELECT role FROM admins WHERE id = $1", [staffId]);
+    if (!rows.length) return res.status(404).json({ error: "Account not found" });
+    if (rows[0].role === "owner") return res.status(403).json({ error: "Cannot remove the owner account" });
+
+    await pool.query("DELETE FROM admins WHERE id = $1", [staffId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to remove staff" });
+  }
+});
+
 // Owner: wipe all applications + ratings (admin accounts untouched)
 app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
   try {
