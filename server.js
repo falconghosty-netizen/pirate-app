@@ -136,10 +136,6 @@ app.post("/submit", async (req, res) => {
     const user = req.session.user;
     if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
 
-    if (await alreadyApplied(user.id)) {
-      return res.status(409).json({ error: "Already applied" });
-    }
-
     const { ign, about, plans, experience, rp2 } = req.body;
 
     await pool.query(
@@ -168,10 +164,6 @@ app.post("/submit-video", async (req, res) => {
   try {
     const user = req.session.user;
     if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
-
-    if (await alreadyApplied(user.id)) {
-      return res.status(409).json({ error: "Already applied" });
-    }
 
     const { ign, videoLink } = req.body;
 
