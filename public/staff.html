@@ -764,16 +764,19 @@ function renderCard(app) {
     ? `<span style="font-size:0.75rem;color:var(--accent);font-weight:600;">Your rating: ${app.my_score}/10</span>`
     : `<span style="font-size:0.75rem;color:var(--text-dim);">You haven't rated</span>`;
 
+  const decideButtons = sortedView ? `
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="action accept" data-decide="${app.id}" data-decision="accept">✓ Accept</button>
+      <button class="action deny" data-decide="${app.id}" data-decision="deny">✕ Deny</button>
+    </div>` : "";
+
   const actionsHtml = app.status === "pending" ? `
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <input type="number" min="1" max="10" class="rate-input" id="rate-${app.id}" placeholder="1–10">
       <button class="action rate" data-rate="${app.id}">${app.my_score ? "Update My Rating" : "Submit Rating"}</button>
       ${myRatingLabel}
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="action accept" data-decide="${app.id}" data-decision="accept">✓ Accept</button>
-      <button class="action deny" data-decide="${app.id}" data-decision="deny">✕ Deny</button>
-    </div>
+    ${decideButtons}
   ` : `
     <span class="meta-line">Decided by ${escapeHtml(app.decided_by)} on ${new Date(app.decided_at).toLocaleString()}</span>
   `;
