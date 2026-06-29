@@ -440,19 +440,77 @@
       background: linear-gradient(135deg, rgba(60,0,25,0.6), rgba(40,0,18,0.8));
       border: 1px solid rgba(180,30,60,0.4);
       color: rgba(255,100,130,0.9);
-      padding: 9px 18px;
+      padding: 11px 22px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.18s;
       letter-spacing: 0.3px;
     }
-    .owner-sort-btn:hover {
+    .owner-sort-btn:hover:not(:disabled) {
       background: linear-gradient(135deg, rgba(90,0,35,0.7), rgba(60,0,25,0.9));
       border-color: rgba(220,50,80,0.6);
       color: #ff8099;
       box-shadow: 0 3px 16px rgba(200,30,60,0.3);
+    }
+    .owner-sort-btn.locked {
+      background: linear-gradient(135deg, #1a0a00, #0f0500);
+      border: 1px solid rgba(255,180,40,0.35);
+      color: rgba(255,190,60,0.7);
+      cursor: default;
+      opacity: 1;
+      box-shadow: 0 0 14px rgba(255,160,30,0.1);
+      font-style: italic;
+    }
+
+    .sorted-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(180,120,0,0.12), rgba(100,60,0,0.18));
+      border: 1px solid rgba(255,180,40,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 24px rgba(200,140,0,0.1);
+    }
+    .sorted-banner.visible { display: flex; }
+    .sorted-banner-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .sorted-banner-text strong {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: rgba(255,200,60,0.95);
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .sorted-banner-text span {
+      font-size: 0.75rem;
+      color: rgba(255,180,40,0.55);
+    }
+
+    .group-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,180,50,0.8);
+      margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .group-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: rgba(255,160,40,0.6);
+      border-radius: 2px;
     }
   </style>
 </head>
@@ -523,6 +581,14 @@
       <button class="filter-btn" data-rated="yes">Rated by Me</button>
     </div>
 
+    <div class="sorted-banner" id="sortedBanner">
+      <div class="sorted-banner-icon">🔒</div>
+      <div class="sorted-banner-text">
+        <strong>Final Sorted View — Decision Mode Active</strong>
+        <span>Applications are locked by rating. Accept or deny each candidate below.</span>
+      </div>
+    </div>
+
     <div id="loadingMsg">Loading applications…</div>
     <div id="emptyMsg" style="display:none;">No applications here.</div>
     <div id="list"></div>
@@ -572,7 +638,6 @@ document.querySelectorAll("[data-status]").forEach(btn => {
     document.querySelectorAll("[data-status]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentStatus = btn.dataset.status;
-    sortedView = false;
     loadApplications();
   });
 });
@@ -582,7 +647,6 @@ document.querySelectorAll("[data-type]").forEach(btn => {
     document.querySelectorAll("[data-type]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentType = btn.dataset.type;
-    sortedView = false;
     loadApplications();
   });
 });
@@ -592,13 +656,19 @@ document.querySelectorAll("[data-rated]").forEach(btn => {
     document.querySelectorAll("[data-rated]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentRated = btn.dataset.rated;
-    sortedView = false;
     loadApplications();
   });
 });
 
 document.getElementById("sortBtn").addEventListener("click", () => {
+  if (sortedView) return;
+  if (!confirm("Sort all applications by rating and enter decision mode?\n\nThis will group applications by type, order them high → low by average rating, and unlock Accept / Deny buttons.\n\nDo this once all staff have finished rating.")) return;
   sortedView = true;
+  const btn = document.getElementById("sortBtn");
+  btn.textContent = "🔒 Sorted — Decision Mode Active";
+  btn.classList.add("locked");
+  btn.disabled = true;
+  document.getElementById("sortedBanner").classList.add("visible");
   renderList(lastApps);
 });
 
