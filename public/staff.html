@@ -844,7 +844,7 @@ function renderCard(app) {
 
   const actionsHtml = app.status === "pending" ? `
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <input type="number" min="1" max="10" class="rate-input" id="rate-${app.id}" placeholder="1–10">
+      <input type="number" min="1" max="10" step="1" class="rate-input" id="rate-${app.id}" placeholder="1–10">
       <button class="action rate" data-rate="${app.id}">${app.my_score ? "Update My Rating" : "Submit Rating"}</button>
       ${myRatingLabel}
     </div>

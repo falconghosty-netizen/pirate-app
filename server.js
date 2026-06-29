@@ -167,10 +167,29 @@ app.post("/submit-video", async (req, res) => {
 
     const { ign, videoLink } = req.body;
 
+    const allowedDomains = [
+      "youtube.com", "youtu.be",
+      "medal.tv",
+      "twitch.tv", "clips.twitch.tv",
+      "streamable.com",
+      "drive.google.com",
+      "imgur.com",
+      "vimeo.com"
+    ];
+
+    let parsedUrl;
+    try { parsedUrl = new URL(videoLink); } catch {
+      return res.status(400).json({ error: "Invalid video link." });
+    }
+    const hostname = parsedUrl.hostname.replace(/^www\./, "");
+    if (!allowedDomains.some(d => hostname === d || hostname.endsWith("." + d))) {
+      return res.status(400).json({ error: "Video link must be from YouTube, Medal, Twitch, Streamable, Google Drive, Imgur, or Vimeo." });
+    }
+
     await pool.query(
       `INSERT INTO applications (discord_id, discord_username, ign, type, video_link)
        VALUES ($1, $2, $3, 'video', $4)`,
-      [user.id, user.username, ign || "N/A", videoLink || "N/A"]
+      [user.id, user.username, ign || "N/A", videoLink]
     );
 
     res.json({ success: true });
@@ -436,8 +455,8 @@ app.post("/api/staff/rate", requireAdmin, async (req, res) => {
     const { applicationId, score } = req.body;
     const s = parseInt(score, 10);
 
-    if (!applicationId || isNaN(s) || s < 1 || s > 10) {
-      return res.status(400).json({ error: "Score must be a number between 1 and 10" });
+    if (!applicationId || isNaN(s) || s < 1 || s > 10 || String(s) !== String(score).trim()) {
+      return res.status(400).json({ error: "Score must be a whole number between 1 and 10." });
     }
 
     await pool.query(
