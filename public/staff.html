@@ -662,7 +662,7 @@ document.querySelectorAll("[data-rated]").forEach(btn => {
 
 document.getElementById("sortBtn").addEventListener("click", () => {
   if (sortedView) return;
-  if (!confirm("Sort all applications by rating and enter decision mode?\n\nThis will group applications by type, order them high → low by average rating, and unlock Accept / Deny buttons.\n\nDo this once all staff have finished rating.")) return;
+  if (!confirm("Sort applications by rating?\n\nDo this once everyone has finished rating.")) return;
   sortedView = true;
   const btn = document.getElementById("sortBtn");
   btn.textContent = "🔒 Sorted — Decision Mode Active";
@@ -684,11 +684,11 @@ document.getElementById("genCodeBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("clearBtn").addEventListener("click", async () => {
-  if (!confirm("This will permanently delete ALL applications and ratings. Admin accounts are NOT affected. Continue?")) return;
+  if (!confirm("Wipe all applications and ratings? This can't be undone.")) return;
 
-  const phrase = prompt('Type "DELETE ALL APPLICATIONS" exactly to confirm:');
+  const phrase = prompt('Type "DELETE ALL APPLICATIONS" to confirm:');
   if (phrase !== "DELETE ALL APPLICATIONS") {
-    alert("Phrase didn't match — nothing was deleted.");
+    alert("Didn't match — nothing was deleted.");
     return;
   }
 
@@ -723,7 +723,7 @@ async function loadStaffList() {
 }
 
 async function removeStaff(id, name) {
-  if (!confirm(`Remove staff account "${name}"? This cannot be undone.`)) return;
+  if (!confirm(`Remove ${name}?`)) return;
   const res = await fetch("/api/admin/remove-staff", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -899,7 +899,7 @@ async function submitRating(applicationId) {
 }
 
 async function decide(applicationId, decision) {
-  if (!confirm(`Are you sure you want to ${decision} this application?`)) return;
+  if (!confirm(`${decision === "accept" ? "Accept" : "Deny"} this application?`)) return;
 
   const res = await fetch("/api/staff/decide", {
     method: "POST",
