@@ -7,37 +7,83 @@
   <link rel="icon" href="/sarkovialogo.png">
   <link rel="stylesheet" href="/admin-theme.css">
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ── Header ─────────────────────────────────────── */
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 28px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      background: rgba(10,0,8,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(180,30,60,0.25);
       position: sticky;
       top: 0;
       z-index: 50;
+      box-shadow: 0 2px 30px rgba(0,0,0,0.5);
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 6px;
     }
     header h1 {
-      font-size: 1.05rem;
+      font-size: 1rem;
+      font-weight: 700;
       margin: 0;
+      background: linear-gradient(135deg, #fff 30%, #cc3355);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.3px;
+    }
+    header .right { display: flex; align-items: center; gap: 12px; }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 5px 14px 5px 10px;
+      font-size: 0.8rem;
       color: var(--text);
     }
-    header .right { display: flex; align-items: center; gap: 14px; }
-    header .user { font-size: 0.85rem; color: var(--text-dim); }
-    header button.logout {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      cursor: pointer;
+    .user-chip .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c46e;
+      box-shadow: 0 0 6px #22c46e;
+      flex-shrink: 0;
     }
-    header button.logout:hover { border-color: var(--red); color: var(--red); }
+    header button.logout {
+      background: rgba(240,53,48,0.1);
+      border: 1px solid rgba(240,53,48,0.3);
+      color: rgba(240,100,96,0.9);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    header button.logout:hover {
+      background: rgba(240,53,48,0.2);
+      border-color: #f03530;
+      color: #ff6b68;
+    }
 
-    .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+    /* ── Layout ─────────────────────────────────────── */
+    .wrap { max-width: 1020px; margin: 0 auto; padding: 32px 24px 100px; }
 
     #accessMsg {
       text-align: center;
@@ -46,251 +92,383 @@
       font-size: 0.95rem;
     }
 
+    /* ── Section labels ──────────────────────────────── */
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.25);
+      margin: 28px 0 10px;
+    }
+
+    /* ── Owner panel ─────────────────────────────────── */
     .owner-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin-bottom: 24px;
+      background: linear-gradient(145deg, rgba(80,0,30,0.45) 0%, rgba(30,0,15,0.6) 100%);
+      border: 1px solid rgba(180,30,60,0.4);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 0 40px rgba(150,0,40,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .owner-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(220,40,80,0.8), transparent);
     }
     .owner-panel h2 {
-      font-size: 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      margin: 0 0 14px;
+      letter-spacing: 2px;
+      color: rgba(255,80,110,0.9);
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    .owner-panel h2::before {
+      content: '◆';
+      font-size: 0.55rem;
+    }
+
     .owner-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
     .code-box {
       display: none;
-      background: var(--panel-alt);
-      border: 1px solid var(--accent);
-      border-radius: 6px;
-      padding: 8px 14px;
-      font-family: monospace;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(91,140,255,0.5);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Courier New', monospace;
       font-size: 0.95rem;
-      color: var(--accent);
-      letter-spacing: 1px;
+      color: #7aaeff;
+      letter-spacing: 2px;
+      box-shadow: 0 0 12px rgba(91,140,255,0.2);
     }
-    .code-list { margin-top: 14px; max-height: 140px; overflow-y: auto; }
+
+    .code-list { margin-top: 16px; max-height: 140px; overflow-y: auto; }
     .code-row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.78rem;
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       color: var(--text-dim);
     }
-    .code-row code { color: var(--text); }
-    .code-row .used { color: var(--text-dim); }
-    .code-row .unused { color: var(--green); }
+    .code-row code { color: var(--text); font-size: 0.82rem; letter-spacing: 1px; }
+    .code-row .used { color: rgba(255,255,255,0.3); }
+    .code-row .unused { color: #22c46e; font-weight: 600; }
 
-    .danger-zone {
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+    .owner-divider {
+      height: 1px;
+      background: rgba(180,30,60,0.2);
+      margin: 20px 0;
     }
-    .danger-zone p {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      margin: 0 0 10px;
+
+    .owner-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255,255,255,0.3);
+      margin: 0 0 12px;
     }
+
     button.danger {
-      background: rgba(224,97,92,0.12);
-      border: 1px solid var(--red);
-      color: var(--red);
-      padding: 8px 16px;
-      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(180,20,20,0.3), rgba(120,10,10,0.4));
+      border: 1px solid rgba(240,53,48,0.5);
+      color: #ff6b68;
+      padding: 9px 18px;
+      border-radius: 8px;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      transition: all 0.18s;
+      box-shadow: 0 2px 12px rgba(240,53,48,0.2);
     }
-    button.danger:hover { background: rgba(224,97,92,0.22); }
+    button.danger:hover {
+      background: linear-gradient(135deg, rgba(200,30,30,0.4), rgba(150,15,15,0.5));
+      box-shadow: 0 4px 20px rgba(240,53,48,0.35);
+    }
 
+    /* ── Filter/tab bar ──────────────────────────────── */
     .tabs, .filters {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .tab-btn, .filter-btn {
       background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      padding: 8px 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      padding: 7px 16px;
       border-radius: 8px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.18s ease;
+      letter-spacing: 0.2px;
     }
-    .tab-btn.active, .filter-btn.active {
-      background: var(--accent);
-      color: #0c1320;
-      border-color: var(--accent);
-      box-shadow: 0 2px 12px rgba(91,140,255,0.3);
+    .tab-btn.active {
+      background: linear-gradient(135deg, #cc2244, #e8304a);
+      color: #fff;
+      border-color: #e8304a;
+      box-shadow: 0 2px 14px rgba(220,40,70,0.45);
+    }
+    .filter-btn.active {
+      background: rgba(91,140,255,0.18);
+      color: #7aaeff;
+      border-color: rgba(91,140,255,0.5);
+      box-shadow: 0 0 12px rgba(91,140,255,0.2);
     }
     .tab-btn:hover:not(.active), .filter-btn:hover:not(.active) {
-      border-color: var(--accent);
-      color: var(--text);
-      background: rgba(91,140,255,0.08);
+      border-color: rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.07);
     }
 
+    /* ── Cards ───────────────────────────────────────── */
     #loadingMsg, #emptyMsg {
       text-align: center;
-      color: var(--text-dim);
-      padding: 60px 20px;
+      color: rgba(255,255,255,0.25);
+      padding: 70px 20px;
       font-size: 0.95rem;
     }
 
     .group-title {
-      font-size: 0.78rem;
+      font-size: 0.7rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      margin: 24px 0 12px;
+      letter-spacing: 1.5px;
+      color: rgba(255,80,110,0.7);
+      margin: 28px 0 12px;
     }
 
     .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin-bottom: 16px;
+      background: linear-gradient(160deg, rgba(30,12,20,0.9) 0%, rgba(18,8,14,0.95) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
     }
+    .card:hover {
+      border-color: rgba(180,30,60,0.35);
+      box-shadow: 0 6px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(180,30,60,0.1);
+    }
+
     .card-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
-    .card-id { display: flex; align-items: center; gap: 10px; }
+    .card-id { display: flex; align-items: center; gap: 12px; }
+
     .type-badge {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 4px;
-      color: white;
-      white-space: nowrap;
-    }
-    .type-badge.written { background: #5865F2; }
-    .type-badge.video { background: #E67E22; }
-
-    .card-id .ign { font-weight: 700; color: var(--text); font-size: 1rem; }
-    .card-id .ign.hidden-id { color: var(--text-dim); font-weight: 500; font-style: italic; font-size: 0.85rem; }
-    .card-id .discord { color: var(--text-dim); font-size: 0.85rem; }
-
-    .score-pill {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 0.8rem;
-      color: var(--accent);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .field-row { margin-bottom: 12px; }
-    .field-row label {
-      display: block;
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.62rem;
+      font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
     }
-    .field-row p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--text); white-space: pre-wrap; }
-    .field-row a { color: var(--accent); word-break: break-all; }
+    .type-badge.written {
+      background: rgba(88,101,242,0.2);
+      color: #a0aaff;
+      border: 1px solid rgba(88,101,242,0.4);
+    }
+    .type-badge.video {
+      background: rgba(230,126,34,0.15);
+      color: #f0a060;
+      border: 1px solid rgba(230,126,34,0.35);
+    }
+
+    .card-id .ign { font-weight: 800; color: #fff; font-size: 1.05rem; letter-spacing: 0.2px; }
+    .card-id .ign.hidden-id { color: rgba(255,255,255,0.3); font-weight: 500; font-style: italic; font-size: 0.85rem; }
+    .card-id .discord { color: rgba(255,255,255,0.4); font-size: 0.82rem; margin-top: 2px; }
+
+    .score-pill {
+      background: rgba(255,220,80,0.08);
+      border: 1px solid rgba(255,200,60,0.25);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.82rem;
+      color: #ffd060;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(255,200,60,0.1);
+    }
+
+    .field-row { margin-bottom: 14px; }
+    .field-row label {
+      display: block;
+      font-size: 0.63rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 5px;
+    }
+    .field-row p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.8);
+      white-space: pre-wrap;
+    }
+    .field-row a { color: #7aaeff; word-break: break-all; }
 
     .card-actions {
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 10px;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
     }
+
     .rate-input {
-      width: 56px;
-      padding: 7px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--panel-alt);
-      color: var(--text);
-      font-size: 0.85rem;
-      text-align: center;
-    }
-    button.action {
-      padding: 9px 18px;
+      width: 60px;
+      padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 0.9rem;
+      text-align: center;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .rate-input:focus { border-color: #4d80ff; box-shadow: 0 0 0 3px rgba(77,128,255,0.15); }
+
+    button.action {
+      padding: 10px 20px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
-      background: rgba(255,255,255,0.04);
-      color: var(--text-dim);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.5);
       transition: all 0.18s ease;
       letter-spacing: 0.3px;
     }
-    button.action:hover { border-color: var(--accent); color: var(--text); }
-    button.action.rate {
-      background: linear-gradient(135deg, #2255ee, #4d80ff);
-      color: #fff;
-      border-color: #4d80ff;
-      box-shadow: 0 3px 14px rgba(77,128,255,0.55);
-    }
-    button.action.rate:hover { background: linear-gradient(135deg, #1a44dd, #3a6fee); box-shadow: 0 5px 20px rgba(77,128,255,0.7); }
-    button.action.accept {
-      background: linear-gradient(135deg, #1a8c52, #22c46e);
-      color: #fff;
-      border-color: #22c46e;
-      box-shadow: 0 3px 14px rgba(34,196,110,0.5);
-    }
-    button.action.accept:hover { background: linear-gradient(135deg, #12773f, #1aaa5c); box-shadow: 0 5px 20px rgba(34,196,110,0.65); }
-    button.action.deny {
-      background: linear-gradient(135deg, #b01c18, #f03530);
-      color: #fff;
-      border-color: #f03530;
-      box-shadow: 0 3px 14px rgba(240,53,48,0.55);
-    }
-    button.action.deny:hover { background: linear-gradient(135deg, #930f0c, #d42520); box-shadow: 0 5px 20px rgba(240,53,48,0.7); }
-    button.action.remove-staff {
-      background: rgba(224,97,92,0.1);
-      color: var(--red);
-      border-color: rgba(224,97,92,0.4);
-      font-size: 0.75rem;
-      padding: 5px 12px;
-    }
-    button.action.remove-staff:hover { background: rgba(224,97,92,0.2); border-color: var(--red); }
+    button.action:hover { border-color: rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.08); }
 
-    .meta-line { font-size: 0.72rem; color: var(--text-dim); margin-top: 10px; }
+    button.action.rate {
+      background: linear-gradient(135deg, #1a44cc, #3a6fee);
+      color: #fff;
+      border-color: rgba(77,128,255,0.6);
+      box-shadow: 0 3px 16px rgba(60,100,240,0.5);
+    }
+    button.action.rate:hover {
+      background: linear-gradient(135deg, #1035bb, #2a5edd);
+      box-shadow: 0 5px 22px rgba(60,100,240,0.7);
+      transform: translateY(-1px);
+    }
+    button.action.accept {
+      background: linear-gradient(135deg, #0f7040, #16a85c);
+      color: #fff;
+      border-color: rgba(22,168,92,0.5);
+      box-shadow: 0 3px 16px rgba(20,160,80,0.4);
+    }
+    button.action.accept:hover {
+      background: linear-gradient(135deg, #0a5a32, #0f9050);
+      box-shadow: 0 5px 22px rgba(20,160,80,0.6);
+      transform: translateY(-1px);
+    }
+    button.action.deny {
+      background: linear-gradient(135deg, #991010, #d42020);
+      color: #fff;
+      border-color: rgba(220,40,40,0.5);
+      box-shadow: 0 3px 16px rgba(200,30,30,0.4);
+    }
+    button.action.deny:hover {
+      background: linear-gradient(135deg, #7a0a0a, #b81818);
+      box-shadow: 0 5px 22px rgba(200,30,30,0.6);
+      transform: translateY(-1px);
+    }
+    button.action.remove-staff {
+      background: rgba(220,40,40,0.1);
+      color: #ff7070;
+      border-color: rgba(220,40,40,0.35);
+      font-size: 0.75rem;
+      padding: 5px 13px;
+    }
+    button.action.remove-staff:hover {
+      background: rgba(220,40,40,0.2);
+      border-color: rgba(220,40,40,0.6);
+      transform: none;
+    }
+
+    .meta-line { font-size: 0.72rem; color: rgba(255,255,255,0.3); margin-top: 10px; }
 
     .status-tag {
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.62rem;
+      font-weight: 800;
       text-transform: uppercase;
       padding: 3px 9px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
+      border-radius: 5px;
+      letter-spacing: 0.8px;
     }
-    .status-tag.accepted { background: rgba(76,175,125,0.15); color: var(--green); }
-    .status-tag.denied { background: rgba(224,97,92,0.15); color: var(--red); }
+    .status-tag.accepted {
+      background: rgba(22,168,92,0.15);
+      color: #22c46e;
+      border: 1px solid rgba(22,168,92,0.3);
+    }
+    .status-tag.denied {
+      background: rgba(220,40,40,0.12);
+      color: #ff6b6b;
+      border: 1px solid rgba(220,40,40,0.3);
+    }
+
+    /* ── Owner sort btn ──────────────────────────────── */
+    .owner-sort-btn {
+      background: linear-gradient(135deg, rgba(60,0,25,0.6), rgba(40,0,18,0.8));
+      border: 1px solid rgba(180,30,60,0.4);
+      color: rgba(255,100,130,0.9);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 0.3px;
+    }
+    .owner-sort-btn:hover {
+      background: linear-gradient(135deg, rgba(90,0,35,0.7), rgba(60,0,25,0.9));
+      border-color: rgba(220,50,80,0.6);
+      color: #ff8099;
+      box-shadow: 0 3px 16px rgba(200,30,60,0.3);
+    }
   </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Staff Dashboard</h1>
+  <div class="header-logo">
+    <img src="/sarkovialogo.png" alt="logo">
+    <h1>Staff Dashboard</h1>
+  </div>
   <div class="right">
-    <span class="user" id="userLabel"></span>
+    <div class="user-chip" id="userLabel" style="display:none;">
+      <span class="dot"></span>
+      <span id="userLabelText"></span>
+    </div>
     <button class="logout" id="logoutBtn" style="display:none;">Log out</button>
   </div>
 </header>
@@ -309,16 +487,21 @@
       </div>
       <div class="code-list" id="codeList"></div>
 
-      <div class="danger-zone">
-        <p style="margin-bottom:10px;">Sort applications by rating across all staff:</p>
-        <button class="tab-btn" id="sortBtn" style="margin-bottom:16px;">⬇ Sort by Rating (High → Low)</button>
+      <div class="owner-divider"></div>
 
-        <p>Manage staff accounts:</p>
-        <div id="staffList" style="margin-bottom:16px;"></div>
+      <div class="owner-section-title">Sort Applications</div>
+      <button class="owner-sort-btn" id="sortBtn">⬇ Sort by Rating (High → Low)</button>
 
-        <p>Wiping applications permanently deletes all applications and ratings. Admin accounts and invite codes are not affected. This cannot be undone.</p>
-        <button class="danger" id="clearBtn">Wipe All Applications</button>
-      </div>
+      <div class="owner-divider"></div>
+
+      <div class="owner-section-title">Staff Accounts</div>
+      <div id="staffList" style="margin-bottom:16px;"></div>
+
+      <div class="owner-divider"></div>
+
+      <div class="owner-section-title">Danger Zone</div>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.3);margin:0 0 12px;">Permanently deletes all applications and ratings. Cannot be undone.</p>
+      <button class="danger" id="clearBtn">⚠ Wipe All Applications</button>
     </div>
 
     <div class="tabs">
@@ -365,7 +548,8 @@ async function init() {
     return;
   }
 
-  document.getElementById("userLabel").textContent = `${me.username} (${me.role})`;
+  document.getElementById("userLabel").style.display = "flex";
+  document.getElementById("userLabelText").textContent = `${me.username} · ${me.role}`;
   document.getElementById("logoutBtn").style.display = "inline-block";
   document.getElementById("dashboard").style.display = "block";
 
