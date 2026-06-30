@@ -136,11 +136,11 @@ app.post("/submit", async (req, res) => {
     const user = req.session.user;
     if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
 
-    const { ign, about, plans, experience, rp2 } = req.body;
+    const { ign, about, plans, experience, rp2, rp3 } = req.body;
 
     await pool.query(
-      `INSERT INTO applications (discord_id, discord_username, ign, type, about, plans, experience, rp2)
-       VALUES ($1, $2, $3, 'written', $4, $5, $6, $7)`,
+      `INSERT INTO applications (discord_id, discord_username, ign, type, about, plans, experience, rp2, rp3)
+       VALUES ($1, $2, $3, 'written', $4, $5, $6, $7, $8)`,
       [
         user.id,
         user.username,
@@ -148,7 +148,8 @@ app.post("/submit", async (req, res) => {
         truncate(about),
         truncate(plans),
         truncate(experience),
-        truncate(rp2)
+        truncate(rp2),
+        truncate(rp3)
       ]
     );
 
@@ -414,7 +415,7 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
         a.id, a.type, a.status, a.submitted_at, a.decided_by, a.decided_at,
         CASE WHEN a.status = 'pending' THEN NULL ELSE a.ign END AS ign,
         CASE WHEN a.status = 'pending' THEN NULL ELSE a.discord_username END AS discord_username,
-        a.about, a.plans, a.experience, a.rp2, a.video_link,
+        a.about, a.plans, a.experience, a.rp2, a.rp3, a.video_link,
         COALESCE(r.avg_score, 0)::float AS avg_score,
         COALESCE(r.rating_count, 0)::int AS rating_count,
         ur.score AS my_score

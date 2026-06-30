@@ -503,11 +503,20 @@
         <textarea name="experience" placeholder="Do you have any previous experience in civ events? Which ones? What did you do in them?" required></textarea>
       </div>
       <hr>
-      <div class="section-card">
-        <p><b>Roleplay Question!</b> Reply in the character you plan on playing in the event.</p>
+      <div class="section-card" style="border-left-color: var(--parchment-gold);">
+        <p style="font-family: 'Rye', serif; font-size: 1rem; color: var(--parchment-gold); margin-bottom: 4px; letter-spacing: 1px;">&#x2605; Roleplay Questions &#x2605;</p>
+        <p style="color: var(--parchment-tan); font-size: 0.85rem; font-style: italic; margin-bottom: 18px;">Reply in the character you plan on playing in the event.</p>
+
         <div class="field-group">
-          <label>The Traitor</label>
-          <textarea name="rp2" placeholder="Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?" required></textarea>
+          <label>The Gold Strike</label>
+          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You and your friend have struck gold! Your friend wants to share this news with everyone and spread the wealth! What would you do in this situation?"</p>
+          <textarea name="rp2" placeholder="Answer in character…" required></textarea>
+        </div>
+
+        <div class="field-group" style="margin-top: 18px;">
+          <label>The Showdown</label>
+          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You are transporting on your wagon and on your way you see a showdown between a well-known Outlaw clan and the Local sheriff department. What do you do?"</p>
+          <textarea name="rp3" placeholder="Answer in character…" required></textarea>
         </div>
       </div>
       <button type="submit">Submit Application</button>
@@ -522,7 +531,8 @@
           <li>A brief introduction — who you are</li>
           <li>Your plans for the event</li>
           <li>Any previous experience in civ events and what you did in them</li>
-          <li style="color: var(--parchment-cream);"><b>Roleplay question</b> — answer in character: <em>"Your captain asks you to throw one of your friends to the sharks for stealing part of the treasures for himself, what do you do?"</em></li>
+          <li style="color: var(--parchment-cream);"><b>Roleplay question 1</b> — answer in character: <em>"You and your friend have struck gold! Your friend wants to share this news with everyone and spread the wealth! What would you do in this situation?"</em></li>
+          <li style="color: var(--parchment-cream);"><b>Roleplay question 2</b> — answer in character: <em>"You are transporting on your wagon and on your way you see a showdown between a well-known Outlaw clan and the Local sheriff department. What do you do?"</em></li>
         </ul>
       </div>
 

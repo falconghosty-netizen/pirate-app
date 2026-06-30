@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS applications (
   plans            TEXT,
   experience       TEXT,
   rp2              TEXT,
+  rp3              TEXT,
   video_link       TEXT,
   status           TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'denied')),
   submitted_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
