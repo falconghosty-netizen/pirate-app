@@ -317,18 +317,29 @@
       max-width: 1100px;
       margin: 0 auto;
     }
+    .staff-board-header {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(30,12,4,0.85) 0%, rgba(50,25,8,0.9) 50%, rgba(30,12,4,0.85) 100%);
+      border: 2px solid rgba(212,168,67,0.5);
+      border-radius: 6px;
+      padding: 14px 48px 12px;
+      margin: 0 auto 36px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,168,67,0.15);
+      width: fit-content;
+      left: 50%; position: relative; transform: translateX(-50%);
+    }
     .staff-board-title {
       font-family: 'Wanted One', serif;
       font-size: 2rem; font-weight: 900;
       color: var(--parchment-gold);
-      text-align: center; margin: 0 0 10px;
+      text-align: center; margin: 0 0 6px;
       text-shadow: 0 0 30px rgba(212,168,67,0.5), 2px 2px 0 rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);
       letter-spacing: 2px;
     }
     .staff-board-sub {
       font-family: 'Rye', serif; font-size: 0.75rem;
       letter-spacing: 5px; text-transform: uppercase;
-      color: var(--parchment-tan); text-align: center; margin: 0 0 40px; opacity: 0.8;
+      color: var(--parchment-tan); text-align: center; margin: 0; opacity: 0.8;
     }
     .staff-row {
       display: flex; justify-content: center;
@@ -703,8 +714,10 @@ function closeStaff() {
 <div id="staffPage">
   <div class="staff-board-bg">
     <div class="staff-board-inner">
-      <h1 class="staff-board-title">🌵 The Crew 🌵</h1>
-      <p class="staff-board-sub">— Sarkovia Event Staff —</p>
+      <div class="staff-board-header">
+        <h1 class="staff-board-title">🌵 The Crew 🌵</h1>
+        <p class="staff-board-sub">— Sarkovia Event Staff —</p>
+      </div>
 
       <!-- Row 1: Omerone, Aether, OzR, Zoro -->
       <div class="staff-row">
