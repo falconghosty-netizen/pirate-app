@@ -392,13 +392,13 @@
       top: 0; left: 0; right: 0;
       z-index: 400;
       height: 54px;
-      background: rgba(10,10,10,0.25);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(5,5,5,0.6);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
       display: flex;
       align-items: center;
       padding: 0 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
     }
     .top-bar-brand {
       font-family: 'Rye', serif;
@@ -424,6 +424,9 @@
       box-shadow: none;
       margin: 0;
       padding: 0;
+      width: auto;
+      position: static;
+      overflow: visible;
       display: inline-flex;
       align-items: center;
       height: 20px;
@@ -437,6 +440,9 @@
       text-decoration: none;
       text-shadow: none;
       transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .staff-float-btn::before, .admin-float-btn::before {
+      content: none;
     }
     .staff-float-btn:hover, .admin-float-btn:hover {
       opacity: 0.75;
