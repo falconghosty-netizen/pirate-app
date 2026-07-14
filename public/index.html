@@ -278,13 +278,15 @@
 
     /* ===== DISCORD BADGE ===== */
     .discord-badge {
-      position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
       transition: transform 0.2s ease, opacity 0.2s ease; opacity: 0.85;
     }
     .discord-badge:hover { transform: scale(1.08); opacity: 1; }
     .discord-badge img {
-      width: 80px; height: 80px; border-radius: 50%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 0 0 2px rgba(180,130,50,0.4);
+      width: 34px; height: 34px; border-radius: 50%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 0 2px rgba(180,130,50,0.4);
     }
 
     .login-text {
@@ -472,6 +474,9 @@
     <button class="staff-float-btn" onclick="openStaff()">Meet the Staff</button>
     <a href="/admin/login" class="admin-float-btn">Admin Login</a>
   </div>
+  <a href="https://discord.gg/sarkovia" target="_blank" class="discord-badge" title="Join our Discord">
+    <img src="/sarkovialogo.png" alt="Sarkovia Discord">
+  </a>
 </div>
 
 <div class="container">
@@ -728,10 +733,6 @@ function closeStaff() {
   setTimeout(() => { p.style.display = 'none'; }, 500);
 }
 </script>
-
-<a href="https://discord.gg/sarkovia" target="_blank" class="discord-badge" title="Join our Discord">
-  <img src="/sarkovialogo.png" alt="Sarkovia Discord">
-</a>
 
 <!-- ===== STAFF PAGE ===== -->
 <div id="staffPage">
