@@ -53,5 +53,16 @@ CREATE TABLE IF NOT EXISTS admin_invite_codes (
   used_by    TEXT
 );
 
+-- ===== APP SETTINGS (single row, global flags) =====
+-- Tracks whether the current batch of applications has been "sorted"
+-- (locked into decision mode) by the owner. Server-side so every
+-- staff member's dashboard agrees, and it survives page refreshes.
+CREATE TABLE IF NOT EXISTS app_settings (
+  id     INTEGER PRIMARY KEY DEFAULT 1,
+  sorted BOOLEAN NOT NULL DEFAULT false,
+  CHECK (id = 1)
+);
+INSERT INTO app_settings (id, sorted) VALUES (1, false) ON CONFLICT (id) DO NOTHING;
+
 -- NOTE: the session store (connect-pg-simple) creates its own
 -- "user_sessions" table automatically on first run — nothing to add here.

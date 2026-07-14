@@ -562,7 +562,34 @@ async function init() {
     loadStaffList();
   }
 
+  await loadSortStatus();
   loadApplications();
+}
+
+// Pull the real, server-side sorted flag so it's the same for every
+// staff member and survives page refreshes.
+async function loadSortStatus() {
+  const res = await fetch("/api/staff/sort-status");
+  if (!res.ok) return;
+  const data = await res.json();
+  sortedView = !!data.sorted;
+  applySortedUi();
+}
+
+function applySortedUi() {
+  const btn = document.getElementById("sortBtn");
+  const banner = document.getElementById("sortedBanner");
+  if (sortedView) {
+    btn.textContent = "🔒 Sorted — Decision Mode Active";
+    btn.classList.add("locked");
+    btn.disabled = true;
+    banner.classList.add("visible");
+  } else {
+    btn.textContent = "⬇ Sort by Rating (High → Low)";
+    btn.classList.remove("locked");
+    btn.disabled = false;
+    banner.classList.remove("visible");
+  }
 }
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {
@@ -597,15 +624,19 @@ document.querySelectorAll("[data-rated]").forEach(btn => {
   });
 });
 
-document.getElementById("sortBtn").addEventListener("click", () => {
+document.getElementById("sortBtn").addEventListener("click", async () => {
   if (sortedView) return;
   if (!confirm("Sort applications by rating?\n\nDo this once everyone has finished rating.")) return;
+
+  const res = await fetch("/api/staff/sort", { method: "POST" });
+  const data = await res.json();
+  if (!res.ok) {
+    alert("Failed to sort: " + (data.error || "unknown error"));
+    return;
+  }
+
   sortedView = true;
-  const btn = document.getElementById("sortBtn");
-  btn.textContent = "🔒 Sorted — Decision Mode Active";
-  btn.classList.add("locked");
-  btn.disabled = true;
-  document.getElementById("sortedBanner").classList.add("visible");
+  applySortedUi();
   renderList(lastApps);
 });
 
@@ -799,7 +830,10 @@ function renderCard(app) {
             <div>${discordDisplay}</div>
           </div>
         </div>
-        <div class="score-pill">⭐ ${Number(app.avg_score).toFixed(1)}/10 (${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""})</div>
+        <div class="score-pill">${sortedView
+          ? `⭐ ${Number(app.avg_score).toFixed(1)}/10 (${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""})`
+          : `${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""}`
+        }</div>
       </div>
 
       ${fieldsHtml}

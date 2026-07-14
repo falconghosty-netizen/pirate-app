@@ -385,6 +385,7 @@ app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
       await client.query("DELETE FROM applications");
       await client.query("ALTER SEQUENCE applications_id_seq RESTART WITH 1");
       await client.query("ALTER SEQUENCE ratings_id_seq RESTART WITH 1");
+      await client.query("UPDATE app_settings SET sorted = false WHERE id = 1");
       await client.query("COMMIT");
     } catch (e) {
       await client.query("ROLLBACK");
@@ -403,6 +404,30 @@ app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
 // =========================================================
 // ===== STAFF DASHBOARD API (requires admin login) =====
 // =========================================================
+
+// Any logged-in staff: check whether this batch has been sorted (locked
+// into decision mode) yet. Server-side truth, so it survives refresh and
+// is the same for every staff member.
+app.get("/api/staff/sort-status", requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT sorted FROM app_settings WHERE id = 1");
+    res.json({ sorted: rows[0]?.sorted || false });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load sort status" });
+  }
+});
+
+// Owner: lock applications into "sorted" decision mode for everyone.
+app.post("/api/staff/sort", requireOwner, async (req, res) => {
+  try {
+    await pool.query("UPDATE app_settings SET sorted = true WHERE id = 1");
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to sort applications" });
+  }
+});
 
 app.get("/api/staff/applications", requireAdmin, async (req, res) => {
   try {
