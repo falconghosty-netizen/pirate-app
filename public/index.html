@@ -15,6 +15,8 @@
       --parchment-cream:  #e8c97a;
       --parchment-tan:    #b8894a;
       --ink-dark:         #1a0e05;
+      --sark-red:         #d6332f;
+      --sark-red-dark:    #8f1f1c;
     }
 
     * { box-sizing: border-box; }
@@ -28,6 +30,7 @@
       justify-content: center;
       align-items: center;
       overflow-x: hidden;
+      padding-top: 54px;
     }
 
     body::before {
@@ -382,57 +385,50 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(212,168,67,0.15);
     }
 
-    /* ===== FLOATING STAFF BUTTON ===== */
-    .staff-float-btn {
+    /* ===== TOP BAR ===== */
+    .top-bar {
       position: fixed;
-      top: 14px; right: 14px;
+      top: 0; left: 0; right: 0;
       z-index: 400;
-      padding: 6px 12px;
-      font-family: 'Rye', serif;
-      font-size: 0.55rem; font-weight: 700;
-      letter-spacing: 1px; text-transform: uppercase;
-      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
-      color: var(--parchment-gold);
-      border: 1px solid var(--parchment-tan);
-      border-radius: 3px; cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      white-space: nowrap;
-      width: auto;
-      margin: 0;
+      height: 54px;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.7);
     }
-    .staff-float-btn:hover {
-      transform: translateY(-2px);
-      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
-      border-color: var(--parchment-gold);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,168,67,0.15);
-    }
-
-    .admin-float-btn {
-      position: fixed;
-      top: 14px; right: 200px;
-      z-index: 400;
-      padding: 6px 12px;
+    .top-bar-brand {
       font-family: 'Rye', serif;
-      font-size: 0.55rem; font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: 2px;
+      color: var(--sark-red);
+      text-shadow: 0 0 12px rgba(214,51,47,0.45);
+    }
+    .top-bar-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .staff-float-btn, .admin-float-btn {
+      padding: 8px 16px;
+      font-family: 'Rye', serif;
+      font-size: 0.6rem; font-weight: 700;
       letter-spacing: 1px; text-transform: uppercase;
-      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
-      color: var(--parchment-gold);
-      border: 1px solid var(--parchment-tan);
+      background: linear-gradient(160deg, var(--sark-red) 0%, var(--sark-red-dark) 100%);
+      color: #ffffff;
+      border: 1px solid var(--sark-red-dark);
       border-radius: 3px; cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
       white-space: nowrap;
       text-decoration: none;
       display: inline-block;
     }
-    .admin-float-btn:hover {
+    .staff-float-btn:hover, .admin-float-btn:hover {
       transform: translateY(-2px);
-      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
-      border-color: var(--parchment-gold);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,168,67,0.15);
+      background: linear-gradient(160deg, #e8433e 0%, var(--sark-red) 100%);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.6), 0 0 15px rgba(214,51,47,0.3);
     }
   </style>
 </head>
@@ -448,8 +444,13 @@
 
 <div class="bg-effects"></div>
 
-<button class="staff-float-btn" onclick="openStaff()">🌵 Meet the Staff</button>
-<a href="/admin/login" class="admin-float-btn">🔑 Admin Login</a>
+<div class="top-bar">
+  <span class="top-bar-brand">SARKOVIA</span>
+  <div class="top-bar-actions">
+    <button class="staff-float-btn" onclick="openStaff()">Meet the Staff</button>
+    <a href="/admin/login" class="admin-float-btn">Admin Login</a>
+  </div>
+</div>
 
 <div class="container">
   <span class="corner-bl">✦</span>
