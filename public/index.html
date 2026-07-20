@@ -695,11 +695,13 @@ async function init() {
     });
     if (r.status === 409) {
       e.target.style.display = "none";
+      document.querySelector(".app-type-toggle").style.display = "none";
       document.getElementById("alreadyAppliedMessage").style.display = "block";
       return;
     }
     if (!r.ok) { alert("Submission failed: " + await r.text()); return; }
     e.target.style.display = "none";
+    document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("thankYouMessage").style.display = "block";
   });
 
@@ -720,11 +722,13 @@ async function init() {
     });
     if (r.status === 409) {
       e.target.style.display = "none";
+      document.querySelector(".app-type-toggle").style.display = "none";
       document.getElementById("alreadyAppliedMessage").style.display = "block";
       return;
     }
     if (!r.ok) { alert("Submission failed: " + await r.text()); return; }
     e.target.style.display = "none";
+    document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("thankYouMessage").style.display = "block";
   });
 }
