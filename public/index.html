@@ -626,7 +626,14 @@ function dismissSplash() {
   setTimeout(() => splash.remove(), 1400);
 }
 
-{
+const justLoggedIn = new URLSearchParams(location.search).get("login") === "1";
+if (justLoggedIn) {
+  history.replaceState(null, "", location.pathname);
+}
+
+if (justLoggedIn) {
+  splash.remove();
+} else {
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => splash.remove());
   setTimeout(dismissSplash, 15000);

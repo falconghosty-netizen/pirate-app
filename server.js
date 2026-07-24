@@ -94,7 +94,7 @@ app.get("/callback", async (req, res) => {
     req.session.user = user;
 
     console.log("Logged in user:", user.username);
-    res.redirect("/");
+    res.redirect("/?login=1");
   } catch (err) {
     console.error("OAuth error:", err);
     res.send("Login failed");
