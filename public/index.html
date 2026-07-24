@@ -9,13 +9,13 @@
 
   <style>
     :root {
-      --parchment-dark:   #2a1a08;
-      --parchment-mid:    #3d2510;
-      --parchment-light:  #5c3718;
-      --parchment-gold:   #d4a843;
-      --parchment-cream:  #e8c97a;
-      --parchment-tan:    #b8894a;
-      --ink-dark:         #1a0e05;
+      --parchment-dark:   #2e2415;
+      --parchment-mid:    #473820;
+      --parchment-light:  #6b5738;
+      --parchment-gold:   #c2a45e;
+      --parchment-cream:  #ddd0a8;
+      --parchment-tan:    #a68b5b;
+      --ink-dark:         #1e170d;
       --sark-red:         #d6332f;
       --sark-red-dark:    #8f1f1c;
     }
@@ -93,27 +93,27 @@
       background:
         radial-gradient(ellipse at 20% 10%, rgba(90,50,15,0.35) 0%, transparent 55%),
         radial-gradient(ellipse at 80% 90%, rgba(60,30,8,0.4) 0%, transparent 55%),
-        linear-gradient(160deg, #2b1a09 0%, #1e1008 40%, #2a1809 70%, #1a0d05 100%);
+        linear-gradient(160deg, #2f2716 0%, #221b10 40%, #2e2415 70%, #1e170d 100%);
       border: 3px solid var(--parchment-tan);
       border-radius: 4px;
-      outline: 1px solid rgba(212,168,67,0.25);
+      outline: 1px solid rgba(194,164,94,0.25);
       outline-offset: -8px;
       box-shadow:
         0 0 0 6px rgba(30,16,4,0.9),
-        0 0 0 9px rgba(180,130,60,0.3),
+        0 0 0 9px rgba(166,139,91,0.3),
         0 20px 60px rgba(0,0,0,0.85),
         inset 0 0 80px rgba(0,0,0,0.5);
       scrollbar-width: thin;
-      scrollbar-color: var(--parchment-gold) #1a0d05;
+      scrollbar-color: var(--parchment-gold) #1e170d;
     }
     .container::-webkit-scrollbar { width: 6px; }
-    .container::-webkit-scrollbar-track { background: #1a0d05; }
+    .container::-webkit-scrollbar-track { background: #1e170d; }
     .container::-webkit-scrollbar-thumb { background: var(--parchment-gold); border-radius: 3px; }
 
     .container::before, .container::after, .corner-bl, .corner-br {
       content: ''; position: absolute;
       width: 24px; height: 14px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cg fill='%23d4a843'%3E%3Crect x='14' y='14' width='8' height='8'/%3E%3Crect x='20' y='20' width='72' height='10'/%3E%3Cpolygon points='22,30 38,30 34,54 18,54'/%3E%3Crect x='38' y='30' width='6' height='10'/%3E%3C/g%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cg fill='%23c2a45e'%3E%3Crect x='14' y='14' width='8' height='8'/%3E%3Crect x='20' y='20' width='72' height='10'/%3E%3Cpolygon points='22,30 38,30 34,54 18,54'/%3E%3Crect x='38' y='30' width='6' height='10'/%3E%3C/g%3E%3C/svg%3E");
       background-size: contain;
       background-repeat: no-repeat;
       opacity: 0.6;
@@ -155,8 +155,8 @@
     }
     hr::after {
       content: '🪙'; font-size: 16px; color: var(--parchment-gold);
-      background: #1e1008; padding: 0 12px; position: relative; z-index: 1;
-      text-shadow: 0 0 10px rgba(212,168,67,0.5);
+      background: #221b10; padding: 0 12px; position: relative; z-index: 1;
+      text-shadow: 0 0 10px rgba(194,164,94,0.5);
     }
 
     /* ===== FIELDS ===== */
@@ -168,16 +168,16 @@
     }
     input, textarea {
       width: 100%; padding: 11px 14px; border-radius: 3px;
-      border: 1px solid rgba(180,130,50,0.35);
+      border: 1px solid rgba(166,139,91,0.35);
       background: rgba(15,8,2,0.7); color: var(--parchment-cream);
       font-family: 'Special Elite', Georgia, serif; font-size: 0.95rem;
       resize: vertical; box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; outline: none;
     }
-    input::placeholder, textarea::placeholder { color: rgba(180,140,70,0.4); font-style: italic; }
+    input::placeholder, textarea::placeholder { color: rgba(166,145,110,0.4); font-style: italic; }
     input:focus, textarea:focus {
       border-color: var(--parchment-gold); background: rgba(20,11,3,0.85);
-      box-shadow: 0 0 0 2px rgba(212,168,67,0.12), inset 0 0 20px rgba(212,168,67,0.04);
+      box-shadow: 0 0 0 2px rgba(194,164,94,0.12), inset 0 0 20px rgba(194,164,94,0.04);
     }
     input[readonly] { opacity: 0.65; cursor: not-allowed; }
 
@@ -189,9 +189,9 @@
       letter-spacing: 2px; text-transform: uppercase;
       position: relative; overflow: hidden;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      background: linear-gradient(160deg, #6b5738 0%, #423522 50%, #55462c 100%);
       color: var(--parchment-gold); border: 1px solid var(--parchment-tan);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,168,67,0.2), inset 0 -1px 0 rgba(0,0,0,0.4);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(194,164,94,0.2), inset 0 -1px 0 rgba(0,0,0,0.4);
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
     button::before {
@@ -201,18 +201,18 @@
     }
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.7), 0 0 20px rgba(212,168,67,0.15), inset 0 1px 0 rgba(212,168,67,0.3);
-      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7), 0 0 20px rgba(194,164,94,0.15), inset 0 1px 0 rgba(194,164,94,0.3);
+      background: linear-gradient(160deg, #7d6540 0%, #55462c 50%, #6b5738 100%);
       border-color: var(--parchment-gold);
     }
     button:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 2px 4px rgba(0,0,0,0.4); }
 
     .secondary {
-      background: linear-gradient(160deg, #2a1a08 0%, #1a0e05 50%, #251508 100%);
-      color: var(--parchment-tan); border-color: rgba(180,130,50,0.4);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,168,67,0.1);
+      background: linear-gradient(160deg, #2e2415 0%, #1e170d 50%, #2a2216 100%);
+      color: var(--parchment-tan); border-color: rgba(166,139,91,0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(194,164,94,0.1);
     }
-    .secondary:hover { background: linear-gradient(160deg, #3d2510 0%, #2a1809 50%, #351d0d 100%); }
+    .secondary:hover { background: linear-gradient(160deg, #473820 0%, #2e2415 50%, #3c3220 100%); }
 
     /* ===== APP TYPE TOGGLE ===== */
     .app-type-toggle {
@@ -222,28 +222,28 @@
       flex: 1; margin-top: 0; padding: 12px 8px;
       font-size: 0.72rem; letter-spacing: 1.5px;
       opacity: 0.55;
-      background: linear-gradient(160deg, #2a1a08 0%, #1a0e05 50%, #251508 100%);
-      border-color: rgba(180,130,50,0.3); color: var(--parchment-tan);
+      background: linear-gradient(160deg, #2e2415 0%, #1e170d 50%, #2a2216 100%);
+      border-color: rgba(166,139,91,0.3); color: var(--parchment-tan);
     }
     .app-type-toggle button.active {
       opacity: 1;
-      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      background: linear-gradient(160deg, #6b5738 0%, #423522 50%, #55462c 100%);
       border-color: var(--parchment-gold); color: var(--parchment-gold);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 15px rgba(212,168,67,0.1), inset 0 1px 0 rgba(212,168,67,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 15px rgba(194,164,94,0.1), inset 0 1px 0 rgba(194,164,94,0.2);
     }
     .app-type-toggle button:hover { transform: translateY(-1px); opacity: 1; }
 
     /* ===== SECTION CARD ===== */
     .section-card {
       background: rgba(10,5,2,0.55);
-      border: 1px solid rgba(180,130,50,0.3);
+      border: 1px solid rgba(166,139,91,0.3);
       border-left: 3px solid var(--parchment-tan);
       border-radius: 3px; padding: 16px 18px; margin: 14px 0;
       text-align: left; position: relative;
     }
     .section-card::before {
       content: '🌵'; position: absolute; top: -10px; left: 14px;
-      font-size: 14px; background: #1e1008; padding: 0 6px; color: var(--parchment-gold);
+      font-size: 14px; background: #221b10; padding: 0 6px; color: var(--parchment-gold);
     }
     .section-card p {
       text-align: left; font-size: 0.88rem; color: var(--parchment-tan); margin: 0 0 12px; font-style: italic;
@@ -253,7 +253,7 @@
     #thankYouMessage, #alreadyAppliedMessage { display: none; text-align: center; padding: 20px; }
     #thankYouMessage h2, #alreadyAppliedMessage h2 {
       font-family: 'Wanted One', serif; color: var(--parchment-gold);
-      font-size: 1.1rem; text-shadow: 0 0 15px rgba(212,168,67,0.4); margin-bottom: 12px;
+      font-size: 1.1rem; text-shadow: 0 0 15px rgba(194,164,94,0.4); margin-bottom: 12px;
     }
 
     /* ===== ANIMATIONS ===== */
@@ -339,11 +339,11 @@
     .staff-board-header {
       display: inline-block;
       background: linear-gradient(135deg, rgba(30,12,4,0.85) 0%, rgba(50,25,8,0.9) 50%, rgba(30,12,4,0.85) 100%);
-      border: 2px solid rgba(212,168,67,0.5);
+      border: 2px solid rgba(194,164,94,0.5);
       border-radius: 6px;
       padding: 14px 48px 12px;
       margin: 0 auto 36px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,168,67,0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(194,164,94,0.15);
       width: fit-content;
       left: 50%; position: relative; transform: translateX(-50%);
     }
@@ -352,7 +352,7 @@
       font-size: 2rem; font-weight: 900;
       color: var(--parchment-gold);
       text-align: center; margin: 0 0 6px;
-      text-shadow: 0 0 30px rgba(212,168,67,0.5), 2px 2px 0 rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);
+      text-shadow: 0 0 30px rgba(194,164,94,0.5), 2px 2px 0 rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8);
       letter-spacing: 2px;
     }
     .staff-board-sub {
@@ -387,18 +387,18 @@
       width: fit-content; padding: 14px 40px;
       font-family: 'Rye', serif; font-size: 0.8rem;
       font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      background: linear-gradient(160deg, #5c3010 0%, #3a1c08 50%, #4a2510 100%);
+      background: linear-gradient(160deg, #6b5738 0%, #423522 50%, #55462c 100%);
       color: var(--parchment-gold); border: 1px solid var(--parchment-tan);
       border-radius: 3px; cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,67,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(194,164,94,0.2);
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
     .staff-back-btn:hover {
       transform: translateY(-2px);
-      background: linear-gradient(160deg, #6e3a14 0%, #4a2510 50%, #5c3010 100%);
+      background: linear-gradient(160deg, #7d6540 0%, #55462c 50%, #6b5738 100%);
       border-color: var(--parchment-gold);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(212,168,67,0.15);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(194,164,94,0.15);
     }
 
     /* ===== TOP BAR ===== */
@@ -497,7 +497,7 @@
   <div id="loginPage">
     <div class="header-ornament fade-in" style="animation-delay:0s;">
       <span></span>
-      <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#d4a843">🪙</text></svg>
+      <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#c2a45e">🪙</text></svg>
       <span></span>
     </div>
     <h1 class="fade-in" style="animation-delay:0.15s;">Wild West: Dreaded Gold Rush</h1>
@@ -512,7 +512,7 @@
   <div id="appPage" style="display:none;">
     <div class="header-ornament">
       <span></span>
-      <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#d4a843">🪙</text></svg>
+      <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#c2a45e">🪙</text></svg>
       <span></span>
     </div>
     <h1>Wild West: Dreaded Gold Rush Event</h1>
@@ -541,17 +541,17 @@
       </div>
       <div class="field-group">
         <label>About You</label>
-        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Tell us about yourself!</p>
+        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(194,164,94,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Tell us about yourself!</p>
         <textarea name="about" placeholder="Your answer…" required></textarea>
       </div>
       <div class="field-group">
         <label>Your Plans</label>
-        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">What are your plans for this event?</p>
+        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(194,164,94,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">What are your plans for this event?</p>
         <textarea name="plans" placeholder="Your answer…" required></textarea>
       </div>
       <div class="field-group">
         <label>Previous Experience</label>
-        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Do you have any previous experience in civ events? Which ones? What did you do in them?</p>
+        <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(194,164,94,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Do you have any previous experience in civ events? Which ones? What did you do in them?</p>
         <textarea name="experience" placeholder="Your answer…" required></textarea>
       </div>
       <hr>
@@ -561,13 +561,13 @@
 
         <div class="field-group">
           <label>The Gold Strike</label>
-          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You and your friend have struck gold! Your friend wants to share this news with everyone and spread the wealth! What would you do in this situation?"</p>
+          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(194,164,94,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You and your friend have struck gold! Your friend wants to share this news with everyone and spread the wealth! What would you do in this situation?"</p>
           <textarea name="rp2" placeholder="Answer in character…" required></textarea>
         </div>
 
         <div class="field-group" style="margin-top: 18px;">
           <label>The Showdown</label>
-          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,168,67,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You are transporting on your wagon and on your way you see a showdown between a well-known Outlaw clan and the Local sheriff department. What do you do?"</p>
+          <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(194,164,94,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You are transporting on your wagon and on your way you see a showdown between a well-known Outlaw clan and the Local sheriff department. What do you do?"</p>
           <textarea name="rp3" placeholder="Answer in character…" required></textarea>
         </div>
       </div>
