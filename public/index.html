@@ -626,10 +626,7 @@ function dismissSplash() {
   setTimeout(() => splash.remove(), 1400);
 }
 
-if (localStorage.getItem("splashSeen")) {
-  splash.remove();
-} else {
-  localStorage.setItem("splashSeen", "1");
+{
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => splash.remove());
   setTimeout(dismissSplash, 15000);
