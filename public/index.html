@@ -94,10 +94,11 @@
         radial-gradient(ellipse at 20% 10%, rgba(90,50,15,0.35) 0%, transparent 55%),
         radial-gradient(ellipse at 80% 90%, rgba(60,30,8,0.4) 0%, transparent 55%),
         linear-gradient(160deg, #2b1a09 0%, #1e1008 40%, #2a1809 70%, #1a0d05 100%);
-      border: 3px solid var(--parchment-tan);
+      border: 10px solid transparent;
+      border-image: repeating-linear-gradient(45deg, var(--parchment-tan) 0 6px, #6b4423 6px 12px) 20 round;
       border-radius: 4px;
       outline: 1px solid rgba(212,168,67,0.25);
-      outline-offset: -8px;
+      outline-offset: -12px;
       box-shadow:
         0 0 0 6px rgba(30,16,4,0.9),
         0 0 0 9px rgba(180,130,60,0.3),
@@ -118,10 +119,10 @@
       background-repeat: no-repeat;
       opacity: 0.6;
     }
-    .container::before { top: 10px; left: 14px; }
-    .container::after  { top: 10px; right: 14px; transform: scaleX(-1); }
-    .corner-bl { bottom: 10px; left: 14px; }
-    .corner-br { bottom: 10px; right: 14px; transform: scaleX(-1); }
+    .container::before { top: 16px; left: 18px; }
+    .container::after  { top: 16px; right: 18px; transform: scaleX(-1); }
+    .corner-bl { bottom: 16px; left: 18px; }
+    .corner-br { bottom: 16px; right: 18px; transform: scaleX(-1); }
 
     /* ===== TYPOGRAPHY ===== */
     h1 {
