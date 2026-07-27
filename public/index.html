@@ -543,17 +543,17 @@
       <div class="field-group">
         <label>About You</label>
         <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,175,55,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Tell us about yourself!</p>
-        <textarea name="about" placeholder="Your answer…" required></textarea>
+        <textarea name="about" id="about" placeholder="Your answer…" required></textarea>
       </div>
       <div class="field-group">
         <label>Your Plans</label>
         <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,175,55,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">What are your plans for this event?</p>
-        <textarea name="plans" placeholder="Your answer…" required></textarea>
+        <textarea name="plans" id="plans" placeholder="Your answer…" required></textarea>
       </div>
       <div class="field-group">
         <label>Previous Experience</label>
         <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,175,55,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">Do you have any previous experience in civ events? Which ones? What did you do in them?</p>
-        <textarea name="experience" placeholder="Your answer…" required></textarea>
+        <textarea name="experience" id="experience" placeholder="Your answer…" required></textarea>
       </div>
       <hr>
       <div class="section-card" style="border-left-color: var(--parchment-gold);">
@@ -563,13 +563,13 @@
         <div class="field-group">
           <label>The Gold Strike</label>
           <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,175,55,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You and your friend have struck gold! Your friend wants to share this news with everyone and spread the wealth! What would you do in this situation?"</p>
-          <textarea name="rp2" placeholder="Answer in character…" required></textarea>
+          <textarea name="rp2" id="rp2" placeholder="Answer in character…" required></textarea>
         </div>
 
         <div class="field-group" style="margin-top: 18px;">
           <label>The Showdown</label>
           <p style="color: var(--parchment-cream); font-size: 0.88rem; font-style: italic; margin: 4px 0 8px; line-height: 1.6; padding: 8px 12px; background: rgba(212,175,55,0.08); border-left: 3px solid var(--parchment-gold); border-radius: 2px;">"You are transporting on your wagon and on your way you see a showdown between a well-known Outlaw clan and the Local sheriff department. What do you do?"</p>
-          <textarea name="rp3" placeholder="Answer in character…" required></textarea>
+          <textarea name="rp3" id="rp3" placeholder="Answer in character…" required></textarea>
         </div>
       </div>
       <button type="submit">Submit Application</button>
@@ -674,6 +674,33 @@ function switchType(type) {
     btnV.classList.add("active");
     btnW.classList.remove("active");
   }
+  saveDraft();
+}
+
+// ===== DRAFT AUTOSAVE =====
+const DRAFT_KEY = "sarkoviaApplicationDraft";
+const DRAFT_FIELD_IDS = ["ign", "about", "plans", "experience", "rp2", "rp3", "vign", "videoLink"];
+
+function saveDraft() {
+  const draft = { type: document.getElementById("btnVideo").classList.contains("active") ? "video" : "written" };
+  DRAFT_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) draft[id] = el.value;
+  });
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
 }
 
 // ===== MAIN =====
@@ -706,6 +733,20 @@ async function init() {
   document.getElementById("discordName").value   = displayName;
   document.getElementById("vdiscordName").value  = displayName;
 
+  // Restore any in-progress draft so people don't lose answers if they
+  // leave the site and come back before submitting.
+  const draft = loadDraft();
+  if (draft) {
+    DRAFT_FIELD_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && draft[id]) el.value = draft[id];
+    });
+    if (draft.type === "video") switchType("video");
+  }
+
+  document.getElementById("applicationForm").addEventListener("input", saveDraft);
+  document.getElementById("videoForm").addEventListener("input", saveDraft);
+
   // Written submit
   document.getElementById("applicationForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -716,12 +757,14 @@ async function init() {
       body: JSON.stringify(data)
     });
     if (r.status === 409) {
+      clearDraft();
       e.target.style.display = "none";
       document.querySelector(".app-type-toggle").style.display = "none";
       document.getElementById("alreadyAppliedMessage").style.display = "block";
       return;
     }
     if (!r.ok) { alert("Submission failed: " + await r.text()); return; }
+    clearDraft();
     e.target.style.display = "none";
     document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("thankYouMessage").style.display = "block";
@@ -743,12 +786,14 @@ async function init() {
       body: JSON.stringify(data)
     });
     if (r.status === 409) {
+      clearDraft();
       e.target.style.display = "none";
       document.querySelector(".app-type-toggle").style.display = "none";
       document.getElementById("alreadyAppliedMessage").style.display = "block";
       return;
     }
     if (!r.ok) { alert("Submission failed: " + await r.text()); return; }
+    clearDraft();
     e.target.style.display = "none";
     document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("thankYouMessage").style.display = "block";
