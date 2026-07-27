@@ -471,7 +471,7 @@
 
 <!-- SPLASH SCREEN -->
 <div id="splash">
-  <video id="splashVideo" autoplay muted playsinline>
+  <video id="splashVideo" autoplay muted playsinline preload="auto" poster="/sarkovialogo.png">
     <source src="/intro.mp4" type="video/mp4">
   </video>
 </div>
@@ -621,7 +621,10 @@
 const splash = document.getElementById("splash");
 const splashVideo = document.getElementById("splashVideo");
 
+let splashDismissed = false;
 function dismissSplash() {
+  if (splashDismissed) return;
+  splashDismissed = true;
   splash.classList.add("fade-out");
   setTimeout(() => splash.remove(), 1400);
 }
@@ -635,7 +638,21 @@ if (justLoggedIn) {
   splash.remove();
 } else {
   splashVideo.addEventListener("ended", dismissSplash);
-  splashVideo.addEventListener("error", () => splash.remove());
+  splashVideo.addEventListener("error", () => { splashDismissed = true; splash.remove(); });
+
+  // If the video hasn't actually started playing within 6s (slow network,
+  // stalled buffering, blocked autoplay), bail out early instead of leaving
+  // people staring at a black/poster screen for the full timeout.
+  const startWatchdog = setTimeout(() => {
+    if (splashVideo.paused) dismissSplash();
+  }, 6000);
+  splashVideo.addEventListener("playing", () => clearTimeout(startWatchdog));
+
+  const playPromise = splashVideo.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(dismissSplash);
+  }
+
   setTimeout(dismissSplash, 15000);
 }
 
