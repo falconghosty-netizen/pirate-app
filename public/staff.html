@@ -301,6 +301,23 @@
       word-break: break-word;
     }
     .field-row a { color: #7aaeff; word-break: break-all; }
+    .field-row p.clamped {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .show-more-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--amber);
+      cursor: pointer;
+      text-decoration: underline;
+    }
 
     .card-actions {
       display: flex;
@@ -771,6 +788,28 @@ function wireCardButtons() {
   });
   document.querySelectorAll("[data-decide]").forEach(btn => {
     btn.addEventListener("click", () => decide(btn.dataset.decide, btn.dataset.decision));
+  });
+  wireExpandableFields();
+}
+
+function wireExpandableFields() {
+  requestAnimationFrame(() => {
+  document.querySelectorAll(".field-row p").forEach(p => {
+    const lineHeight = parseFloat(getComputedStyle(p).lineHeight);
+    const maxHeight = lineHeight * 4 + 1;
+    if (p.scrollHeight <= maxHeight) return;
+
+    p.classList.add("clamped");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "show-more-btn";
+    btn.textContent = "Show more";
+    btn.addEventListener("click", () => {
+      const collapsed = p.classList.toggle("clamped");
+      btn.textContent = collapsed ? "Show more" : "Show less";
+    });
+    p.insertAdjacentElement("afterend", btn);
+  });
   });
 }
 

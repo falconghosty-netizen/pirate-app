@@ -110,11 +110,6 @@ app.get("/logout", (req, res) => {
 });
 
 // ===== HELPERS =====
-function truncate(str, max = 1024) {
-  if (!str) return "N/A";
-  return str.length > max ? str.slice(0, max - 3) + "..." : str;
-}
-
 async function alreadyApplied(discordId) {
   const { rows } = await pool.query(
     "SELECT 1 FROM applications WHERE discord_id = $1 LIMIT 1",
@@ -145,11 +140,11 @@ app.post("/submit", async (req, res) => {
         user.id,
         user.username,
         ign || "N/A",
-        truncate(about),
-        truncate(plans),
-        truncate(experience),
-        truncate(rp2),
-        truncate(rp3)
+        about || "N/A",
+        plans || "N/A",
+        experience || "N/A",
+        rp2 || "N/A",
+        rp3 || "N/A"
       ]
     );
 
