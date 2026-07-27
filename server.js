@@ -203,6 +203,54 @@ app.post("/submit-video", async (req, res) => {
   }
 });
 
+// ===== APPLICATION DRAFT (tied to Discord account) =====
+app.get("/api/draft", async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT data FROM application_drafts WHERE discord_id = $1",
+      [user.id]
+    );
+    res.json({ data: rows[0]?.data || null });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load draft" });
+  }
+});
+
+app.post("/api/draft", async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
+
+  try {
+    await pool.query(
+      `INSERT INTO application_drafts (discord_id, data, updated_at)
+       VALUES ($1, $2, now())
+       ON CONFLICT (discord_id) DO UPDATE SET data = $2, updated_at = now()`,
+      [user.id, JSON.stringify(req.body || {})]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save draft" });
+  }
+});
+
+app.delete("/api/draft", async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
+
+  try {
+    await pool.query("DELETE FROM application_drafts WHERE discord_id = $1", [user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to clear draft" });
+  }
+});
+
 // =========================================================
 // ===== ADMIN ACCOUNTS (username/password, not Discord) =====
 // =========================================================

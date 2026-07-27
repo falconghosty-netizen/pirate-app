@@ -20,6 +20,15 @@ CREATE TABLE IF NOT EXISTS applications (
 CREATE INDEX IF NOT EXISTS idx_applications_discord_id ON applications (discord_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications (status);
 
+-- ===== IN-PROGRESS APPLICATION DRAFTS =====
+-- Lets an applicant's in-progress answers follow their Discord account
+-- across devices/browsers instead of being stuck in one browser's storage.
+CREATE TABLE IF NOT EXISTS application_drafts (
+  discord_id  TEXT PRIMARY KEY,
+  data        JSONB NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- ===== STAFF RATINGS =====
 -- staff_id refers to an admins.id (cast to text) — NOT a Discord ID anymore.
 CREATE TABLE IF NOT EXISTS ratings (

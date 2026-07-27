@@ -677,30 +677,46 @@ function switchType(type) {
   saveDraft();
 }
 
-// ===== DRAFT AUTOSAVE =====
-const DRAFT_KEY = "sarkoviaApplicationDraft";
+// ===== DRAFT AUTOSAVE (tied to the logged-in Discord account) =====
 const DRAFT_FIELD_IDS = ["ign", "about", "plans", "experience", "rp2", "rp3", "vign", "videoLink"];
 
-function saveDraft() {
+async function saveDraft() {
   const draft = { type: document.getElementById("btnVideo").classList.contains("active") ? "video" : "written" };
   DRAFT_FIELD_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) draft[id] = el.value;
   });
-  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  try {
+    await fetch("/api/draft", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft)
+    });
+  } catch {
+    // best-effort; a failed autosave shouldn't interrupt typing
+  }
 }
 
-function loadDraft() {
+let draftSaveTimer = null;
+function scheduleDraftSave() {
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraft, 700);
+}
+
+async function loadDraft() {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const res = await fetch("/api/draft");
+    if (!res.ok) return null;
+    const { data } = await res.json();
+    return data;
   } catch {
     return null;
   }
 }
 
 function clearDraft() {
-  localStorage.removeItem(DRAFT_KEY);
+  clearTimeout(draftSaveTimer);
+  fetch("/api/draft", { method: "DELETE" }).catch(() => {});
 }
 
 // ===== MAIN =====
@@ -734,8 +750,9 @@ async function init() {
   document.getElementById("vdiscordName").value  = displayName;
 
   // Restore any in-progress draft so people don't lose answers if they
-  // leave the site and come back before submitting.
-  const draft = loadDraft();
+  // leave the site and come back before submitting — tied to their
+  // Discord account, so it follows them across devices/browsers too.
+  const draft = await loadDraft();
   if (draft) {
     DRAFT_FIELD_IDS.forEach(id => {
       const el = document.getElementById(id);
@@ -744,8 +761,8 @@ async function init() {
     if (draft.type === "video") switchType("video");
   }
 
-  document.getElementById("applicationForm").addEventListener("input", saveDraft);
-  document.getElementById("videoForm").addEventListener("input", saveDraft);
+  document.getElementById("applicationForm").addEventListener("input", scheduleDraftSave);
+  document.getElementById("videoForm").addEventListener("input", scheduleDraftSave);
 
   // Written submit
   document.getElementById("applicationForm").addEventListener("submit", async (e) => {
