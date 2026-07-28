@@ -201,6 +201,18 @@
       color: #8fabf5;
       border-color: rgba(91,140,255,0.4);
     }
+    .count-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .filter-btn.active .count-badge {
+      background: rgba(255,255,255,0.18);
+    }
     .tab-btn:hover:not(.active), .filter-btn:hover:not(.active) {
       border-color: rgba(255,255,255,0.25);
       color: rgba(255,255,255,0.75);
@@ -528,9 +540,9 @@
     </div>
 
     <div class="filters">
-      <button class="filter-btn active" data-rated="all">All</button>
-      <button class="filter-btn" data-rated="no">Unrated by Me</button>
-      <button class="filter-btn" data-rated="yes">Rated by Me</button>
+      <button class="filter-btn active" data-rated="all">All <span class="count-badge" id="countAllBadge">0</span></button>
+      <button class="filter-btn" data-rated="no">Unrated by Me <span class="count-badge" id="countUnratedBadge">0</span></button>
+      <button class="filter-btn" data-rated="yes">Rated by Me <span class="count-badge" id="countRatedBadge">0</span></button>
     </div>
 
     <div class="sorted-banner" id="sortedBanner">
@@ -738,21 +750,25 @@ async function loadApplications() {
   empty.style.display = "none";
   list.innerHTML = "";
 
-  let url = `/api/staff/applications?status=${currentStatus}&type=${currentType}`;
-  if (currentRated !== "all") url += `&rated=${currentRated}`;
+  // Always fetch the full status+type set (unfiltered by "rated") so the
+  // All/Unrated/Rated counts stay accurate no matter which one is active;
+  // the rated filter itself is applied client-side in renderList().
+  const url = `/api/staff/applications?status=${currentStatus}&type=${currentType}`;
 
   const res = await fetch(url);
   const data = await res.json();
   loading.style.display = "none";
 
   lastApps = data.applications || [];
-
-  if (!lastApps.length) {
-    empty.style.display = "block";
-    return;
-  }
-
+  updateRatedCounts(lastApps);
   renderList(lastApps);
+}
+
+function updateRatedCounts(apps) {
+  const ratedCount = apps.filter(a => a.my_score !== null && a.my_score !== undefined).length;
+  document.getElementById("countAllBadge").textContent = apps.length;
+  document.getElementById("countRatedBadge").textContent = ratedCount;
+  document.getElementById("countUnratedBadge").textContent = apps.length - ratedCount;
 }
 
 function escapeHtml(str) {
@@ -760,8 +776,20 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function renderList(apps) {
+function renderList(rawApps) {
   const list = document.getElementById("list");
+  const empty = document.getElementById("emptyMsg");
+
+  const apps = currentRated === "all"
+    ? rawApps
+    : rawApps.filter(a => currentRated === "yes" ? (a.my_score !== null && a.my_score !== undefined) : (a.my_score === null || a.my_score === undefined));
+
+  if (!apps.length) {
+    list.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
 
   if (sortedView) {
     const written = apps.filter(a => a.type === "written").sort((a, b) => b.avg_score - a.avg_score);
