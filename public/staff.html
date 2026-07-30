@@ -278,6 +278,13 @@
       border: 1px solid rgba(230,126,34,0.35);
     }
 
+    .app-number {
+      font-family: 'Inter', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.3px;
+    }
     .card-id .ign { font-weight: 800; color: #fff; font-size: 1.05rem; letter-spacing: 0.2px; }
     .card-id .ign.hidden-id { color: rgba(255,255,255,0.3); font-weight: 500; font-style: italic; font-size: 0.85rem; }
     .card-id .discord { color: rgba(255,255,255,0.4); font-size: 0.82rem; margin-top: 2px; }
@@ -889,6 +896,7 @@ function renderCard(app) {
     <div class="card" id="card-${app.id}">
       <div class="card-top">
         <div class="card-id">
+          <span class="app-number">#${String(app.seq_num).padStart(3, "0")}</span>
           <span class="type-badge ${app.type}">${isWritten ? "Written" : "Video"}</span>
           <div>
             <div>${ignDisplay}</div>

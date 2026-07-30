@@ -488,14 +488,17 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
 
     let query = `
       SELECT
-        a.id, a.type, a.status, a.submitted_at, a.decided_by, a.decided_at,
+        a.id, a.seq_num, a.type, a.status, a.submitted_at, a.decided_by, a.decided_at,
         CASE WHEN a.status = 'pending' THEN NULL ELSE a.ign END AS ign,
         CASE WHEN a.status = 'pending' THEN NULL ELSE a.discord_username END AS discord_username,
         a.about, a.plans, a.experience, a.rp2, a.rp3, a.video_link,
         COALESCE(r.avg_score, 0)::float AS avg_score,
         COALESCE(r.rating_count, 0)::int AS rating_count,
         ur.score AS my_score
-      FROM applications a
+      FROM (
+        SELECT *, ROW_NUMBER() OVER (ORDER BY submitted_at ASC) AS seq_num
+        FROM applications
+      ) a
       LEFT JOIN (
         SELECT application_id, AVG(score) AS avg_score, COUNT(*) AS rating_count
         FROM ratings
