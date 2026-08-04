@@ -777,6 +777,7 @@ async function init() {
   // Written submit
   document.getElementById("applicationForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!confirm("Are you sure you want to confirm? Once submitted you cannot make any changes or ask for redos to your application.")) return;
     const data = Object.fromEntries(new FormData(e.target).entries());
     const r = await fetch("/submit", {
       method: "POST",
@@ -800,6 +801,7 @@ async function init() {
   // Video submit
   document.getElementById("videoForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!confirm("Are you sure you want to confirm? Once submitted you cannot make any changes or ask for redos to your application.")) return;
     const raw  = Object.fromEntries(new FormData(e.target).entries());
     const data = {
       ign:         raw.vign,
