@@ -17,8 +17,17 @@ CREATE TABLE IF NOT EXISTS applications (
   decided_at       TIMESTAMPTZ
 );
 
+-- Added after initial launch: a device cookie + submission IP, used to
+-- silently flag when a different Discord account applies from the same
+-- device/network as an existing application. NULL for anything submitted
+-- before this shipped — there's nothing to backfill those with.
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS device_id TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS ip_address TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_applications_discord_id ON applications (discord_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications (status);
+CREATE INDEX IF NOT EXISTS idx_applications_device_id ON applications (device_id);
+CREATE INDEX IF NOT EXISTS idx_applications_ip_address ON applications (ip_address);
 
 -- ===== IN-PROGRESS APPLICATION DRAFTS =====
 -- Lets an applicant's in-progress answers follow their Discord account

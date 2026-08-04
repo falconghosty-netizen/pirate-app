@@ -3,6 +3,7 @@ const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -18,6 +19,10 @@ const {
 } = require("./auth");
 
 const app = express();
+
+// Behind Railway's proxy — needed so req.ip reflects the real client IP
+// (X-Forwarded-For) instead of the proxy's own address.
+app.set("trust proxy", 1);
 
 // ===== MIDDLEWARE =====
 app.use(express.json());
@@ -101,8 +106,10 @@ app.get("/callback", async (req, res) => {
   }
 });
 
-app.get("/user", (req, res) => {
-  res.json(req.session.user || null);
+app.get("/user", async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.json(null);
+  res.json({ ...user, alreadyApplied: await alreadyApplied(user.id) });
 });
 
 app.get("/logout", (req, res) => {
@@ -116,6 +123,23 @@ async function alreadyApplied(discordId) {
     [discordId]
   );
   return rows.length > 0;
+}
+
+// Reads the persistent device_id cookie, generating and setting one if
+// missing. No cookie-parser dependency — just a minimal manual parse,
+// since this is the only custom cookie the app needs.
+function getOrSetDeviceId(req, res) {
+  const header = req.headers.cookie || "";
+  const match = header.split(";").map(p => p.trim()).find(p => p.startsWith("device_id="));
+  if (match) return decodeURIComponent(match.slice("device_id=".length));
+
+  const id = crypto.randomUUID();
+  res.cookie("device_id", id, {
+    maxAge: 5 * 365 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: "lax"
+  });
+  return id;
 }
 
 function generateInviteCode() {
@@ -136,10 +160,11 @@ app.post("/submit", async (req, res) => {
     }
 
     const { ign, about, plans, experience, rp2, rp3 } = req.body;
+    const deviceId = getOrSetDeviceId(req, res);
 
     await pool.query(
-      `INSERT INTO applications (discord_id, discord_username, ign, type, about, plans, experience, rp2, rp3)
-       VALUES ($1, $2, $3, 'written', $4, $5, $6, $7, $8)`,
+      `INSERT INTO applications (discord_id, discord_username, ign, type, about, plans, experience, rp2, rp3, device_id, ip_address)
+       VALUES ($1, $2, $3, 'written', $4, $5, $6, $7, $8, $9, $10)`,
       [
         user.id,
         user.username,
@@ -148,7 +173,9 @@ app.post("/submit", async (req, res) => {
         plans || "N/A",
         experience || "N/A",
         rp2 || "N/A",
-        rp3 || "N/A"
+        rp3 || "N/A",
+        deviceId,
+        req.ip
       ]
     );
 
@@ -190,10 +217,12 @@ app.post("/submit-video", async (req, res) => {
       return res.status(400).json({ error: "Video link must be from YouTube, Medal, Twitch, Streamable, Google Drive, Imgur, or Vimeo." });
     }
 
+    const deviceId = getOrSetDeviceId(req, res);
+
     await pool.query(
-      `INSERT INTO applications (discord_id, discord_username, ign, type, video_link)
-       VALUES ($1, $2, $3, 'video', $4)`,
-      [user.id, user.username, ign || "N/A", videoLink]
+      `INSERT INTO applications (discord_id, discord_username, ign, type, video_link, device_id, ip_address)
+       VALUES ($1, $2, $3, 'video', $4, $5, $6)`,
+      [user.id, user.username, ign || "N/A", videoLink, deviceId, req.ip]
     );
 
     res.json({ success: true });
@@ -527,6 +556,79 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to load applications" });
+  }
+});
+
+// Owner-only: groups of applications from different Discord accounts that
+// share a device cookie or submission IP — a silent alt-account signal,
+// never shown to applicants or non-owner staff.
+app.get("/api/staff/flagged", requireOwner, async (req, res) => {
+  try {
+    const { rows: pairs } = await pool.query(`
+      SELECT
+        a1.id AS id1, a2.id AS id2,
+        (a1.device_id = a2.device_id AND a1.device_id IS NOT NULL) AS device_match,
+        (a1.ip_address = a2.ip_address AND a1.ip_address IS NOT NULL) AS ip_match
+      FROM applications a1
+      JOIN applications a2
+        ON a1.id < a2.id
+        AND a1.discord_id != a2.discord_id
+        AND (
+          (a1.device_id = a2.device_id AND a1.device_id IS NOT NULL)
+          OR (a1.ip_address = a2.ip_address AND a1.ip_address IS NOT NULL)
+        )
+    `);
+
+    if (!pairs.length) return res.json({ clusters: [] });
+
+    // Union-find to group pairs into clusters (handles 3+ linked accounts).
+    const parent = new Map();
+    const find = (id) => {
+      if (!parent.has(id)) parent.set(id, id);
+      let root = id;
+      while (parent.get(root) !== root) root = parent.get(root);
+      parent.set(id, root);
+      return root;
+    };
+    const union = (a, b) => { parent.set(find(a), find(b)); };
+
+    const clusterSignals = new Map(); // root -> { device: bool, ip: bool }
+    pairs.forEach(p => {
+      union(p.id1, p.id2);
+    });
+    pairs.forEach(p => {
+      const root = find(p.id1);
+      const sig = clusterSignals.get(root) || { device: false, ip: false };
+      sig.device = sig.device || p.device_match;
+      sig.ip = sig.ip || p.ip_match;
+      clusterSignals.set(root, sig);
+    });
+
+    const groups = new Map(); // root -> Set of ids
+    for (const id of parent.keys()) {
+      const root = find(id);
+      if (!groups.has(root)) groups.set(root, new Set());
+      groups.get(root).add(id);
+    }
+
+    const allIds = [...parent.keys()];
+    const { rows: apps } = await pool.query(
+      `SELECT id, seq_num, ign, discord_username, discord_id, type, status, submitted_at
+       FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY submitted_at ASC) AS seq_num FROM applications) a
+       WHERE id = ANY($1::int[])`,
+      [allIds]
+    );
+    const appById = new Map(apps.map(a => [a.id, a]));
+
+    const clusters = [...groups.entries()].map(([root, idSet]) => ({
+      signals: clusterSignals.get(root),
+      applications: [...idSet].map(id => appById.get(id)).sort((a, b) => a.seq_num - b.seq_num)
+    }));
+
+    res.json({ clusters });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load flagged applications" });
   }
 });
 

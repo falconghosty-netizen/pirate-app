@@ -531,6 +531,12 @@
       <div class="owner-divider"></div>
 
       <button class="danger" id="clearBtn">⚠ Wipe All Applications</button>
+
+      <div id="flaggedDivider" class="owner-divider" style="display:none;"></div>
+      <div id="flaggedSection" style="display:none;">
+        <div class="owner-section-title" style="color:#ff8080;">🚩 Flagged Accounts</div>
+        <div id="flaggedList"></div>
+      </div>
     </div>
 
     <div class="tabs">
@@ -594,6 +600,7 @@ async function init() {
     document.getElementById("ownerPanel").style.display = "block";
     loadInviteCodes();
     loadStaffList();
+    loadFlagged();
   }
 
   await loadSortStatus();
@@ -722,6 +729,42 @@ async function loadStaffList() {
   el.querySelectorAll("[data-staff-id]").forEach(btn => {
     btn.addEventListener("click", () => removeStaff(btn.dataset.staffId, btn.dataset.staffName));
   });
+}
+
+async function loadFlagged() {
+  const res = await fetch("/api/staff/flagged");
+  if (!res.ok) return;
+  const data = await res.json();
+  const clusters = data.clusters || [];
+
+  const divider = document.getElementById("flaggedDivider");
+  const section = document.getElementById("flaggedSection");
+
+  if (!clusters.length) {
+    divider.style.display = "none";
+    section.style.display = "none";
+    return;
+  }
+
+  divider.style.display = "block";
+  section.style.display = "block";
+
+  document.getElementById("flaggedList").innerHTML = clusters.map(c => {
+    const signalLabel = c.signals.device && c.signals.ip
+      ? "Device + IP"
+      : c.signals.device ? "Device" : "IP";
+    const rows = c.applications.map(a => `
+      <div class="code-row" style="padding:6px 0;">
+        <span>#${String(a.seq_num).padStart(3, "0")} — <code>${escapeHtml(a.ign)}</code> — @${escapeHtml(a.discord_username)} — ${a.type} — ${a.status}</span>
+      </div>
+    `).join("");
+    return `
+      <div style="margin-bottom:14px; padding:10px 12px; background:rgba(255,80,80,0.06); border:1px solid rgba(255,80,80,0.25); border-radius:8px;">
+        <div style="font-size:0.72rem; font-weight:700; color:#ff8080; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Matched by: ${signalLabel}</div>
+        ${rows}
+      </div>
+    `;
+  }).join("");
 }
 
 async function removeStaff(id, name) {

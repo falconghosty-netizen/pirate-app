@@ -749,6 +749,16 @@ async function init() {
   document.getElementById("discordName").value   = displayName;
   document.getElementById("vdiscordName").value  = displayName;
 
+  // If they've already submitted, show that immediately instead of the
+  // form — no point letting them fill it out just to find out at the end.
+  if (user.alreadyApplied) {
+    document.querySelector(".app-type-toggle").style.display = "none";
+    document.getElementById("applicationForm").style.display = "none";
+    document.getElementById("videoForm").style.display = "none";
+    document.getElementById("alreadyAppliedMessage").style.display = "block";
+    return;
+  }
+
   // Restore any in-progress draft so people don't lose answers if they
   // leave the site and come back before submitting — tied to their
   // Discord account, so it follows them across devices/browsers too.
