@@ -560,7 +560,7 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
 });
 
 // Owner-only: groups of applications from different Discord accounts that
-// share a device cookie or submission IP — a silent alt-account signal,
+// share a device cookie or reused IGN — a silent alt-account signal,
 // never shown to applicants or non-owner staff.
 app.get("/api/staff/flagged", requireOwner, async (req, res) => {
   try {
@@ -568,14 +568,14 @@ app.get("/api/staff/flagged", requireOwner, async (req, res) => {
       SELECT
         a1.id AS id1, a2.id AS id2,
         (a1.device_id = a2.device_id AND a1.device_id IS NOT NULL) AS device_match,
-        (a1.ip_address = a2.ip_address AND a1.ip_address IS NOT NULL) AS ip_match
+        (LOWER(a1.ign) = LOWER(a2.ign) AND a1.ign IS NOT NULL AND a1.ign != '') AS ign_match
       FROM applications a1
       JOIN applications a2
         ON a1.id < a2.id
         AND a1.discord_id != a2.discord_id
         AND (
           (a1.device_id = a2.device_id AND a1.device_id IS NOT NULL)
-          OR (a1.ip_address = a2.ip_address AND a1.ip_address IS NOT NULL)
+          OR (LOWER(a1.ign) = LOWER(a2.ign) AND a1.ign IS NOT NULL AND a1.ign != '')
         )
     `);
 
@@ -592,15 +592,15 @@ app.get("/api/staff/flagged", requireOwner, async (req, res) => {
     };
     const union = (a, b) => { parent.set(find(a), find(b)); };
 
-    const clusterSignals = new Map(); // root -> { device: bool, ip: bool }
+    const clusterSignals = new Map(); // root -> { device: bool, ign: bool }
     pairs.forEach(p => {
       union(p.id1, p.id2);
     });
     pairs.forEach(p => {
       const root = find(p.id1);
-      const sig = clusterSignals.get(root) || { device: false, ip: false };
+      const sig = clusterSignals.get(root) || { device: false, ign: false };
       sig.device = sig.device || p.device_match;
-      sig.ip = sig.ip || p.ip_match;
+      sig.ign = sig.ign || p.ign_match;
       clusterSignals.set(root, sig);
     });
 

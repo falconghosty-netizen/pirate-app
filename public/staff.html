@@ -739,9 +739,9 @@ async function loadFlagged() {
   section.style.display = "block";
 
   document.getElementById("flaggedList").innerHTML = clusters.map(c => {
-    const signalLabel = c.signals.device && c.signals.ip
-      ? "Device + IP"
-      : c.signals.device ? "Device" : "IP";
+    const signalLabel = c.signals.device && c.signals.ign
+      ? "Device + IGN"
+      : c.signals.device ? "Device" : "Reused IGN";
     const rows = c.applications.map(a => `
       <div class="code-row" style="padding:6px 0;">
         <span>#${String(a.seq_num).padStart(3, "0")} — <code>${escapeHtml(a.ign)}</code> — @${escapeHtml(a.discord_username)} — ${a.type} — ${a.status}</span>
