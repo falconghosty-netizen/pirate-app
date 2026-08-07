@@ -9,7 +9,6 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ── Header ─────────────────────────────────────── */
     header {
       display: flex;
       align-items: center;
@@ -74,7 +73,6 @@
       color: var(--red);
     }
 
-    /* ── Layout ─────────────────────────────────────── */
     .wrap { max-width: 1020px; margin: 0 auto; padding: 32px 24px 100px; }
 
     #accessMsg {
@@ -84,7 +82,6 @@
       font-size: 0.95rem;
     }
 
-    /* ── Section labels ──────────────────────────────── */
     .section-label {
       font-size: 0.68rem;
       font-weight: 800;
@@ -94,7 +91,6 @@
       margin: 28px 0 10px;
     }
 
-    /* ── Owner panel ─────────────────────────────────── */
     .owner-panel {
       background: rgba(20,8,14,0.55);
       border: 1px solid rgba(255,255,255,0.1);
@@ -172,7 +168,6 @@
       border-color: var(--red);
     }
 
-    /* ── Filter/tab bar ──────────────────────────────── */
     .tabs, .filters {
       display: flex;
       gap: 6px;
@@ -219,7 +214,6 @@
       background: rgba(255,255,255,0.06);
     }
 
-    /* ── Cards ───────────────────────────────────────── */
     #loadingMsg, #emptyMsg {
       text-align: center;
       color: rgba(255,255,255,0.25);
@@ -436,7 +430,6 @@
       border: 1px solid rgba(220,40,40,0.3);
     }
 
-    /* ── Owner sort btn ──────────────────────────────── */
     .owner-sort-btn {
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.15);
@@ -470,10 +463,6 @@
       margin-bottom: 20px;
     }
     .sorted-banner.visible { display: flex; }
-    .sorted-banner-icon {
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
     .sorted-banner-text strong {
       display: block;
       font-size: 0.85rem;
@@ -521,7 +510,7 @@
       <div class="owner-divider"></div>
 
       <div class="owner-section-title">Sort Applications</div>
-      <button class="owner-sort-btn" id="sortBtn">⬇ Sort by Rating (High → Low)</button>
+      <button class="owner-sort-btn" id="sortBtn">Sort by Rating (High → Low)</button>
 
       <div class="owner-divider"></div>
 
@@ -530,11 +519,11 @@
 
       <div class="owner-divider"></div>
 
-      <button class="danger" id="clearBtn">⚠ Wipe All Applications</button>
+      <button class="danger" id="clearBtn">Wipe All Applications</button>
 
       <div id="flaggedDivider" class="owner-divider" style="display:none;"></div>
       <div id="flaggedSection" style="display:none;">
-        <div class="owner-section-title" style="color:#ff8080;">🚩 Flagged Accounts</div>
+        <div class="owner-section-title" style="color:#ff8080;">Flagged Accounts</div>
         <div id="flaggedList"></div>
       </div>
     </div>
@@ -559,7 +548,6 @@
     </div>
 
     <div class="sorted-banner" id="sortedBanner">
-      <div class="sorted-banner-icon">🔒</div>
       <div class="sorted-banner-text">
         <strong>Applications Sorted</strong>
         <span>Rated highest to lowest. Accept or deny below.</span>
@@ -579,6 +567,16 @@ let currentType = "all";
 let currentRated = "all";
 let sortedView = false;
 let lastApps = [];
+
+async function postJSON(url, body) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body || {})
+  });
+  const data = await res.json();
+  return { ok: res.ok, data };
+}
 
 async function init() {
   const res = await fetch("/api/admin/me");
@@ -607,8 +605,7 @@ async function init() {
   loadApplications();
 }
 
-// Pull the real, server-side sorted flag so it's the same for every
-// staff member and survives page refreshes.
+// server-side flag, not local state — shared across staff + survives refresh
 async function loadSortStatus() {
   const res = await fetch("/api/staff/sort-status");
   if (!res.ok) return;
@@ -621,12 +618,12 @@ function applySortedUi() {
   const btn = document.getElementById("sortBtn");
   const banner = document.getElementById("sortedBanner");
   if (sortedView) {
-    btn.textContent = "🔒 Sorted — Decision Mode Active";
+    btn.textContent = "Sorted — Decision Mode Active";
     btn.classList.add("locked");
     btn.disabled = true;
     banner.classList.add("visible");
   } else {
-    btn.textContent = "⬇ Sort by Rating (High → Low)";
+    btn.textContent = "Sort by Rating (High → Low)";
     btn.classList.remove("locked");
     btn.disabled = false;
     banner.classList.remove("visible");
@@ -669,9 +666,8 @@ document.getElementById("sortBtn").addEventListener("click", async () => {
   if (sortedView) return;
   if (!confirm("Sort applications by rating?\n\nDo this once everyone has finished rating.")) return;
 
-  const res = await fetch("/api/staff/sort", { method: "POST" });
-  const data = await res.json();
-  if (!res.ok) {
+  const { ok, data } = await postJSON("/api/staff/sort");
+  if (!ok) {
     alert("Failed to sort: " + (data.error || "unknown error"));
     return;
   }
@@ -682,9 +678,8 @@ document.getElementById("sortBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("genCodeBtn").addEventListener("click", async () => {
-  const res = await fetch("/api/admin/generate-code", { method: "POST" });
-  const data = await res.json();
-  if (!res.ok) { alert(data.error || "Failed to generate code"); return; }
+  const { ok, data } = await postJSON("/api/admin/generate-code");
+  if (!ok) { alert(data.error || "Failed to generate code"); return; }
 
   const box = document.getElementById("newCodeBox");
   box.textContent = data.code;
@@ -701,14 +696,8 @@ document.getElementById("clearBtn").addEventListener("click", async () => {
     return;
   }
 
-  const res = await fetch("/api/admin/clear-apps", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ confirmation: phrase })
-  });
-  const data = await res.json();
-
-  if (!res.ok) { alert("Failed: " + (data.error || "unknown error")); return; }
+  const { ok, data } = await postJSON("/api/admin/clear-apps", { confirmation: phrase });
+  if (!ok) { alert("Failed: " + (data.error || "unknown error")); return; }
 
   alert("All applications and ratings have been cleared.");
   loadApplications();
@@ -769,13 +758,8 @@ async function loadFlagged() {
 
 async function removeStaff(id, name) {
   if (!confirm(`Remove ${name}?`)) return;
-  const res = await fetch("/api/admin/remove-staff", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ staffId: id })
-  });
-  const data = await res.json();
-  if (!res.ok) { alert("Failed: " + (data.error || "unknown error")); return; }
+  const { ok, data } = await postJSON("/api/admin/remove-staff", { staffId: id });
+  if (!ok) { alert("Failed: " + (data.error || "unknown error")); return; }
   loadStaffList();
 }
 
@@ -800,9 +784,7 @@ async function loadApplications() {
   empty.style.display = "none";
   list.innerHTML = "";
 
-  // Always fetch the full status+type set (unfiltered by "rated") so the
-  // All/Unrated/Rated counts stay accurate no matter which one is active;
-  // the rated filter itself is applied client-side in renderList().
+  // unfiltered by "rated" so the counts stay accurate; rated filter applied in renderList()
   const url = `/api/staff/applications?status=${currentStatus}&type=${currentType}`;
 
   const res = await fetch(url);
@@ -899,10 +881,10 @@ function renderCard(app) {
 
   const ignDisplay = app.ign !== null
     ? `<span class="ign">${escapeHtml(app.ign)} ${statusTag}</span>`
-    : `<span class="ign hidden-id">🔒 Hidden until decided ${statusTag}</span>`;
+    : `<span class="ign hidden-id">Hidden until decided ${statusTag}</span>`;
   const discordDisplay = app.discord_username !== null
     ? `<span class="discord">@${escapeHtml(app.discord_username)}</span>`
-    : `<span class="discord">🔒 Hidden until decided</span>`;
+    : `<span class="discord">Hidden until decided</span>`;
 
   const fieldsHtml = isWritten ? `
     <div class="field-row"><label>About</label><p>${escapeHtml(app.about)}</p></div>
@@ -920,8 +902,8 @@ function renderCard(app) {
 
   const decideButtons = sortedView ? `
     <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="action accept" data-decide="${app.id}" data-decision="accept">✓ Accept</button>
-      <button class="action deny" data-decide="${app.id}" data-decision="deny">✕ Deny</button>
+      <button class="action accept" data-decide="${app.id}" data-decision="accept">Accept</button>
+      <button class="action deny" data-decide="${app.id}" data-decision="deny">Deny</button>
     </div>` : "";
 
   const actionsHtml = app.status === "pending" ? `
@@ -947,7 +929,7 @@ function renderCard(app) {
           </div>
         </div>
         <div class="score-pill">${sortedView
-          ? `⭐ ${Number(app.avg_score).toFixed(1)}/10 (${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""})`
+          ? `${Number(app.avg_score).toFixed(1)}/10 (${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""})`
           : `${app.rating_count} rating${app.rating_count !== 1 ? "s" : ""}`
         }</div>
       </div>
@@ -971,15 +953,9 @@ async function submitRating(applicationId) {
     return;
   }
 
-  const res = await fetch("/api/staff/rate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ applicationId, score })
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    alert("Failed to rate: " + (err.error || "unknown error"));
+  const { ok, data } = await postJSON("/api/staff/rate", { applicationId, score });
+  if (!ok) {
+    alert("Failed to rate: " + (data.error || "unknown error"));
     return;
   }
 
@@ -989,14 +965,8 @@ async function submitRating(applicationId) {
 async function decide(applicationId, decision) {
   if (!confirm(`${decision === "accept" ? "Accept" : "Deny"} this application?`)) return;
 
-  const res = await fetch("/api/staff/decide", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ applicationId, decision })
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
+  const { ok, data } = await postJSON("/api/staff/decide", { applicationId, decision });
+  if (!ok) {
     alert("Failed: " + (data.error || "unknown error"));
     return;
   }
