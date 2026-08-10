@@ -724,7 +724,7 @@ async function searchApplications(query) {
   // Bail out if the user changed the search box while the request was in flight.
   if (searchQuery !== query) return;
 
-  const apps = (data.applications || []).filter(a => a.seq_num === num);
+  const apps = (data.applications || []).filter(a => Number(a.seq_num) === num);
   lastApps = apps;
   updateRatedCounts(apps);
 
