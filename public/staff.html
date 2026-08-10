@@ -711,7 +711,7 @@ async function loadStaffList() {
   if (!data.staff.length) { el.innerHTML = '<p class="meta-line">No staff accounts yet.</p>'; return; }
   el.innerHTML = data.staff.map(s => `
     <div class="code-row" style="padding:8px 0;">
-      <span><code>${escapeHtml(s.username)}</code> <span class="used" style="margin-left:6px;">${s.role}</span></span>
+      <span><code>${escapeHtml(s.username)}</code> <span class="used" style="margin-left:6px;">${s.role}</span> <span class="count-badge" title="Applications rated">${s.rated_count}</span></span>
       <button class="action remove-staff" data-staff-id="${s.id}" data-staff-name="${escapeHtml(s.username)}">Remove</button>
     </div>
   `).join("");

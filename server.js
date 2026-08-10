@@ -426,9 +426,14 @@ app.get("/api/admin/invite-codes", requireOwner, async (req, res) => {
 
 // Owner: list staff accounts
 app.get("/api/admin/staff-list", requireOwner, async (req, res) => {
-  const { rows } = await pool.query(
-    "SELECT id, username, role FROM admins WHERE role != 'owner' ORDER BY username ASC"
-  );
+  const { rows } = await pool.query(`
+    SELECT a.id, a.username, a.role, COUNT(r.id)::int AS rated_count
+    FROM admins a
+    LEFT JOIN ratings r ON r.staff_id = a.id::text
+    WHERE a.role != 'owner'
+    GROUP BY a.id, a.username, a.role
+    ORDER BY a.username ASC
+  `);
   res.json({ staff: rows });
 });
 
