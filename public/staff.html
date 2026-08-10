@@ -474,6 +474,23 @@
       font-size: 0.75rem;
       color: rgba(217,165,92,0.7);
     }
+
+    /* ── Search ──────────────────────────────────────── */
+    .search-row { margin-bottom: 16px; }
+    .search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.25);
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .search-input:focus { border-color: var(--accent); }
   </style>
 </head>
 
@@ -527,7 +544,9 @@
         <div id="flaggedList"></div>
       </div>
     </div>
-
+    <div class="search-row">
+    <input type="text" id="searchInput" class="search-input" placeholder="Enter application number #" inputmode="numeric" autocomplete="off">
+    </div>
     <div class="tabs">
       <button class="tab-btn active" data-status="pending">Pending</button>
       <button class="tab-btn" data-status="accepted">Accepted</button>
@@ -567,6 +586,7 @@ let currentType = "all";
 let currentRated = "all";
 let sortedView = false;
 let lastApps = [];
+let searchQuery = "";
 
 async function postJSON(url, body) {
   const res = await fetch(url, {
@@ -640,6 +660,7 @@ document.querySelectorAll("[data-status]").forEach(btn => {
     document.querySelectorAll("[data-status]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentStatus = btn.dataset.status;
+    clearSearch();
     loadApplications();
   });
 });
@@ -649,6 +670,7 @@ document.querySelectorAll("[data-type]").forEach(btn => {
     document.querySelectorAll("[data-type]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentType = btn.dataset.type;
+    clearSearch();
     loadApplications();
   });
 });
@@ -658,9 +680,64 @@ document.querySelectorAll("[data-rated]").forEach(btn => {
     document.querySelectorAll("[data-rated]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentRated = btn.dataset.rated;
+    clearSearch();
     loadApplications();
   });
 });
+
+function clearSearch() {
+  searchQuery = "";
+  document.getElementById("searchInput").value = "";
+}
+
+document.getElementById("searchInput").addEventListener("input", () => {
+  searchQuery = document.getElementById("searchInput").value.trim();
+  if (searchQuery) {
+    searchApplications(searchQuery);
+  } else {
+    loadApplications();
+  }
+});
+
+async function searchApplications(query) {
+  const list = document.getElementById("list");
+  const loading = document.getElementById("loadingMsg");
+  const empty = document.getElementById("emptyMsg");
+
+  const num = parseInt(query, 10);
+  if (isNaN(num)) {
+    list.innerHTML = "";
+    loading.style.display = "none";
+    empty.textContent = "Enter a valid application number.";
+    empty.style.display = "block";
+    return;
+  }
+
+  loading.style.display = "block";
+  empty.style.display = "none";
+  list.innerHTML = "";
+
+  const res = await fetch(`/api/staff/applications?status=all&type=all`);
+  const data = await res.json();
+  loading.style.display = "none";
+
+  // Bail out if the user changed the search box while the request was in flight.
+  if (searchQuery !== query) return;
+
+  const apps = (data.applications || []).filter(a => a.seq_num === num);
+  lastApps = apps;
+  updateRatedCounts(apps);
+
+  if (!apps.length) {
+    empty.textContent = "No application found with that number.";
+    empty.style.display = "block";
+    return;
+  }
+
+  empty.style.display = "none";
+  list.innerHTML = apps.map(renderCard).join("");
+  wireCardButtons();
+}
 
 document.getElementById("sortBtn").addEventListener("click", async () => {
   if (sortedView) return;
@@ -782,6 +859,7 @@ async function loadApplications() {
 
   loading.style.display = "block";
   empty.style.display = "none";
+  empty.textContent = "No applications here.";
   list.innerHTML = "";
 
   // unfiltered by "rated" so the counts stay accurate; rated filter applied in renderList()
