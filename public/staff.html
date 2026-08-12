@@ -475,7 +475,6 @@
       color: rgba(217,165,92,0.7);
     }
 
-    /* ── Search ──────────────────────────────────────── */
     .search-row { margin-bottom: 16px; }
     .search-input {
       width: 100%;
@@ -721,7 +720,7 @@ async function searchApplications(query) {
   const data = await res.json();
   loading.style.display = "none";
 
-  // Bail out if the user changed the search box while the request was in flight.
+  // bail if the search box changed while this request was in flight
   if (searchQuery !== query) return;
 
   const apps = (data.applications || []).filter(a => Number(a.seq_num) === num);

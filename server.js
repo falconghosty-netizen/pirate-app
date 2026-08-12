@@ -20,11 +20,10 @@ const {
 
 const app = express();
 
-// Behind Railway's proxy — needed so req.ip reflects the real client IP
-// (X-Forwarded-For) instead of the proxy's own address.
+// behind Railway's proxy — req.ip needs X-Forwarded-For for the real client IP
 app.set("trust proxy", 1);
 
-// ===== MIDDLEWARE =====
+// middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,7 +39,7 @@ app.use(session({
   cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 * 30 } // 30 days
 }));
 
-// ===== ENV =====
+// env
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
@@ -56,17 +55,17 @@ console.log("ENV CHECK:", {
   SESSION_SECRET: !!process.env.SESSION_SECRET
 });
 
-// ===== STATIC FILES =====
+// static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// ===== PAGE ROUTES =====
+// page routes
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/staff", (req, res) => res.sendFile(path.join(__dirname, "public", "staff.html")));
 app.get("/admin/setup", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-setup.html")));
 app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
 app.get("/admin/signup", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-signup.html")));
 
-// ===== DISCORD OAUTH (applicants) =====
+// discord oauth (applicants)
 app.get("/login", (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
@@ -116,7 +115,7 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
 
-// ===== HELPERS =====
+// helpers
 async function alreadyApplied(discordId) {
   const { rows } = await pool.query(
     "SELECT 1 FROM applications WHERE discord_id = $1 LIMIT 1",
@@ -125,9 +124,7 @@ async function alreadyApplied(discordId) {
   return rows.length > 0;
 }
 
-// Reads the persistent device_id cookie, generating and setting one if
-// missing. No cookie-parser dependency — just a minimal manual parse,
-// since this is the only custom cookie the app needs.
+// reads/creates the device_id cookie — manual parse, only custom cookie we need
 function getOrSetDeviceId(req, res) {
   const header = req.headers.cookie || "";
   const match = header.split(";").map(p => p.trim()).find(p => p.startsWith("device_id="));
@@ -149,7 +146,7 @@ function generateInviteCode() {
   return `SARK-${block(4)}-${block(4)}`;
 }
 
-// ===== SUBMIT (written) =====
+// submit (written)
 app.post("/submit", async (req, res) => {
   try {
     const user = req.session.user;
@@ -186,7 +183,7 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-// ===== SUBMIT (video) =====
+// submit (video)
 app.post("/submit-video", async (req, res) => {
   try {
     const user = req.session.user;
@@ -232,7 +229,7 @@ app.post("/submit-video", async (req, res) => {
   }
 });
 
-// ===== APPLICATION DRAFT (tied to Discord account) =====
+// application draft (tied to discord account)
 app.get("/api/draft", async (req, res) => {
   const user = req.session.user;
   if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
@@ -280,12 +277,9 @@ app.delete("/api/draft", async (req, res) => {
   }
 });
 
-// =========================================================
-// ===== ADMIN ACCOUNTS (username/password, not Discord) =====
-// =========================================================
+// admin accounts (username/password, not discord)
 
-// One-time bootstrap: creates the very first ('owner') account.
-// Only works while the admins table is empty.
+// one-time bootstrap: first account created becomes 'owner', only works while admins table is empty
 app.post("/api/admin/setup", async (req, res) => {
   try {
     const { setupKey, username, password } = req.body;
@@ -486,13 +480,9 @@ app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
   }
 });
 
-// =========================================================
-// ===== STAFF DASHBOARD API (requires admin login) =====
-// =========================================================
+// staff dashboard api (requires admin login)
 
-// Any logged-in staff: check whether this batch has been sorted (locked
-// into decision mode) yet. Server-side truth, so it survives refresh and
-// is the same for every staff member.
+// server-side sorted flag — survives refresh, same for every staff member
 app.get("/api/staff/sort-status", requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT sorted FROM app_settings WHERE id = 1");
@@ -564,9 +554,7 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
   }
 });
 
-// Owner-only: groups of applications from different Discord accounts that
-// share a device cookie or reused IGN — a silent alt-account signal,
-// never shown to applicants or non-owner staff.
+// owner-only: clusters apps sharing a device cookie or reused IGN (alt-account signal)
 app.get("/api/staff/flagged", requireOwner, async (req, res) => {
   try {
     const { rows: pairs } = await pool.query(`
@@ -698,7 +686,7 @@ app.post("/api/staff/decide", requireAdmin, async (req, res) => {
   }
 });
 
-// ===== DB INIT + START =====
+// db init + start
 async function initDb() {
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   await pool.query(schema);

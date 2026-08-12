@@ -71,7 +71,7 @@
       100% { transform: scale(1.03) translate(-0.5%, 0.5%); }
     }
 
-    /* ===== SPLASH ===== */
+    /* splash */
     #splash {
       position: fixed; inset: 0; z-index: 99999;
       background: black; display: flex;
@@ -81,7 +81,7 @@
     #splash video { width: 100%; height: 100%; object-fit: cover; }
     #splash.fade-out { opacity: 0; pointer-events: none; }
 
-    /* ===== CONTAINER ===== */
+    /* container */
     .container {
       position: relative;
       width: 100%;
@@ -123,7 +123,7 @@
     .corner-bl { bottom: 10px; left: 14px; }
     .corner-br { bottom: 10px; right: 14px; transform: scaleX(-1); }
 
-    /* ===== TYPOGRAPHY ===== */
+    /* typography */
     h1 {
       font-family: 'Wanted One', serif;
       font-size: 1.35rem; font-weight: 900;
@@ -144,7 +144,7 @@
     }
     b { color: var(--parchment-gold); }
 
-    /* ===== DIVIDER ===== */
+    /* divider */
     hr {
       border: none; margin: 22px 0;
       position: relative; height: 20px;
@@ -160,7 +160,7 @@
       text-shadow: 0 0 10px rgba(212,175,55,0.5);
     }
 
-    /* ===== FIELDS ===== */
+    /* fields */
     .field-group { text-align: left; margin: 14px 0 0; }
     .field-group label {
       display: block; font-family: 'Rye', serif;
@@ -182,7 +182,7 @@
     }
     input[readonly] { opacity: 0.65; cursor: not-allowed; }
 
-    /* ===== BUTTONS ===== */
+    /* buttons */
     button {
       width: 100%; padding: 14px; border: none; border-radius: 3px;
       cursor: pointer; margin-top: 14px;
@@ -215,7 +215,7 @@
     }
     .secondary:hover { background: linear-gradient(160deg, #473820 0%, #2e2415 50%, #3c3220 100%); }
 
-    /* ===== APP TYPE TOGGLE ===== */
+    /* app type toggle */
     .app-type-toggle {
       display: flex; gap: 10px; margin: 16px 0 4px;
     }
@@ -234,7 +234,7 @@
     }
     .app-type-toggle button:hover { transform: translateY(-1px); opacity: 1; }
 
-    /* ===== SECTION CARD ===== */
+    /* section card */
     .section-card {
       background: rgba(10,5,2,0.55);
       border: 1px solid rgba(166,139,91,0.3);
@@ -250,21 +250,21 @@
       text-align: left; font-size: 0.88rem; color: var(--parchment-tan); margin: 0 0 12px; font-style: italic;
     }
 
-    /* ===== SUCCESS / DUPE MESSAGES ===== */
+    /* success / dupe messages */
     #thankYouMessage, #alreadyAppliedMessage { display: none; text-align: center; padding: 20px; }
     #thankYouMessage h2, #alreadyAppliedMessage h2 {
       font-family: 'Wanted One', serif; color: var(--parchment-gold);
       font-size: 1.1rem; text-shadow: 0 0 15px rgba(212,175,55,0.4); margin-bottom: 12px;
     }
 
-    /* ===== ANIMATIONS ===== */
+    /* animations */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .fade-in { opacity: 0; animation: fadeInUp 0.7s ease forwards; }
 
-    /* ===== HEADER ORNAMENT ===== */
+    /* header ornament */
     .header-ornament {
       display: flex; align-items: center; justify-content: center;
       gap: 12px; margin-bottom: 10px; opacity: 0.6;
@@ -277,7 +277,7 @@
       background: linear-gradient(to left, transparent, var(--parchment-tan));
     }
 
-    /* ===== DISCORD BADGE ===== */
+    /* discord badge */
     .discord-badge {
       margin-left: auto;
       display: inline-flex;
@@ -308,7 +308,7 @@
       letter-spacing: 1px; color: var(--parchment-tan); margin: 4px 0 14px; text-align: center;
     }
 
-    /* ===== STAFF PAGE ===== */
+    /* staff page */
     #staffPage {
       display: none;
       position: fixed;
@@ -402,7 +402,7 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.8), 0 0 20px rgba(212,175,55,0.15);
     }
 
-    /* ===== TOP BAR ===== */
+    /* top bar */
     .top-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -617,7 +617,7 @@
 </div>
 
 <script>
-// ===== SPLASH =====
+// splash
 const splash = document.getElementById("splash");
 const splashVideo = document.getElementById("splashVideo");
 
@@ -640,9 +640,7 @@ if (justLoggedIn) {
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => { splashDismissed = true; splash.remove(); });
 
-  // If the video hasn't actually started playing within 6s (slow network,
-  // stalled buffering, blocked autoplay), bail out early instead of leaving
-  // people staring at a black/poster screen for the full timeout.
+  // bail if video hasn't started within 6s (slow network / blocked autoplay)
   const startWatchdog = setTimeout(() => {
     if (splashVideo.paused) dismissSplash();
   }, 6000);
@@ -656,7 +654,7 @@ if (justLoggedIn) {
   setTimeout(dismissSplash, 15000);
 }
 
-// ===== TYPE TOGGLE =====
+// type toggle
 function switchType(type) {
   const writtenForm = document.getElementById("applicationForm");
   const videoForm   = document.getElementById("videoForm");
@@ -677,7 +675,7 @@ function switchType(type) {
   saveDraft();
 }
 
-// ===== DRAFT AUTOSAVE (tied to the logged-in Discord account) =====
+// draft autosave (tied to the logged-in discord account)
 const DRAFT_FIELD_IDS = ["ign", "about", "plans", "experience", "rp2", "rp3", "vign", "videoLink"];
 
 async function saveDraft() {
@@ -719,7 +717,7 @@ function clearDraft() {
   fetch("/api/draft", { method: "DELETE" }).catch(() => {});
 }
 
-// ===== MAIN =====
+// main
 async function init() {
   const res  = await fetch("/user");
   const user = await res.json();
@@ -749,8 +747,7 @@ async function init() {
   document.getElementById("discordName").value   = displayName;
   document.getElementById("vdiscordName").value  = displayName;
 
-  // If they've already submitted, show that immediately instead of the
-  // form — no point letting them fill it out just to find out at the end.
+  // already applied? skip straight to the message, don't bother rendering the form
   if (user.alreadyApplied) {
     document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("applicationForm").style.display = "none";
@@ -759,9 +756,7 @@ async function init() {
     return;
   }
 
-  // Restore any in-progress draft so people don't lose answers if they
-  // leave the site and come back before submitting — tied to their
-  // Discord account, so it follows them across devices/browsers too.
+  // restore draft — tied to Discord account, follows across devices
   const draft = await loadDraft();
   if (draft) {
     DRAFT_FIELD_IDS.forEach(id => {
@@ -831,7 +826,7 @@ async function init() {
 
 init();
 
-// ===== STAFF PAGE =====
+// staff page
 function openStaff() {
   const p = document.getElementById('staffPage');
   p.style.display = 'block';
@@ -844,7 +839,7 @@ function closeStaff() {
 }
 </script>
 
-<!-- ===== STAFF PAGE ===== -->
+<!-- staff page -->
 <div id="staffPage">
   <div class="staff-board-bg">
     <div class="staff-board-inner">

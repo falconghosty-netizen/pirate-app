@@ -1,8 +1,6 @@
 const { Pool } = require("pg");
 
-// Railway injects DATABASE_URL automatically once you add a Postgres
-// service to your project. Internal connections (...railway.internal)
-// don't use SSL; public/proxy connections do.
+// internal (.railway.internal) connections skip SSL, public/proxy ones need it
 const connectionString = process.env.DATABASE_URL;
 const isInternal = (connectionString || "").includes(".railway.internal");
 
