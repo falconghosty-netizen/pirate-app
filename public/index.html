@@ -640,7 +640,7 @@ if (justLoggedIn) {
   splashVideo.addEventListener("ended", dismissSplash);
   splashVideo.addEventListener("error", () => { splashDismissed = true; splash.remove(); });
 
-  // bail if video hasn't started within 6s (slow network / blocked autoplay)
+  // bail if the video hasn't started playing after 6 seconds
   const startWatchdog = setTimeout(() => {
     if (splashVideo.paused) dismissSplash();
   }, 6000);
@@ -675,7 +675,7 @@ function switchType(type) {
   saveDraft();
 }
 
-// draft autosave (tied to the logged-in discord account)
+// draft autosave, tied to the logged in discord account
 const DRAFT_FIELD_IDS = ["ign", "about", "plans", "experience", "rp2", "rp3", "vign", "videoLink"];
 
 async function saveDraft() {
@@ -691,7 +691,7 @@ async function saveDraft() {
       body: JSON.stringify(draft)
     });
   } catch {
-    // best-effort; a failed autosave shouldn't interrupt typing
+    // dont let a failed autosave interrupt typing
   }
 }
 
@@ -747,7 +747,7 @@ async function init() {
   document.getElementById("discordName").value   = displayName;
   document.getElementById("vdiscordName").value  = displayName;
 
-  // already applied? skip straight to the message, don't bother rendering the form
+  // skip the form and go straight to the message if they already applied
   if (user.alreadyApplied) {
     document.querySelector(".app-type-toggle").style.display = "none";
     document.getElementById("applicationForm").style.display = "none";
@@ -756,7 +756,7 @@ async function init() {
     return;
   }
 
-  // restore draft — tied to Discord account, follows across devices
+  // restore the draft, it follows the discord account across devices
   const draft = await loadDraft();
   if (draft) {
     DRAFT_FIELD_IDS.forEach(id => {

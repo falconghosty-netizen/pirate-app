@@ -624,7 +624,7 @@ async function init() {
   loadApplications();
 }
 
-// server-side flag, not local state — shared across staff + survives refresh
+// pulled from the server so it survives a refresh
 async function loadSortStatus() {
   const res = await fetch("/api/staff/sort-status");
   if (!res.ok) return;
@@ -720,7 +720,7 @@ async function searchApplications(query) {
   const data = await res.json();
   loading.style.display = "none";
 
-  // bail if the search box changed while this request was in flight
+  // bail if the search box changed while this was still loading
   if (searchQuery !== query) return;
 
   const apps = (data.applications || []).filter(a => Number(a.seq_num) === num);
@@ -861,7 +861,7 @@ async function loadApplications() {
   empty.textContent = "No applications here.";
   list.innerHTML = "";
 
-  // unfiltered by "rated" so the counts stay accurate; rated filter applied in renderList()
+  // leave out the rated filter here so the counts stay accurate, it gets applied later in renderList
   const url = `/api/staff/applications?status=${currentStatus}&type=${currentType}`;
 
   const res = await fetch(url);

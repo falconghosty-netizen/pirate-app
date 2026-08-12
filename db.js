@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 
-// internal (.railway.internal) connections skip SSL, public/proxy ones need it
+// internal railway connections skip ssl, public and proxy ones need it
 const connectionString = process.env.DATABASE_URL;
 const isInternal = (connectionString || "").includes(".railway.internal");
 

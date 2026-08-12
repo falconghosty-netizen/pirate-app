@@ -20,7 +20,7 @@ const {
 
 const app = express();
 
-// behind Railway's proxy — req.ip needs X-Forwarded-For for the real client IP
+// behind railways proxy, req.ip needs x-forwarded-for to get the real client ip
 app.set("trust proxy", 1);
 
 // middleware
@@ -65,7 +65,7 @@ app.get("/admin/setup", (req, res) => res.sendFile(path.join(__dirname, "public"
 app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
 app.get("/admin/signup", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-signup.html")));
 
-// discord oauth (applicants)
+// discord oauth for applicants
 app.get("/login", (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
@@ -124,7 +124,7 @@ async function alreadyApplied(discordId) {
   return rows.length > 0;
 }
 
-// reads/creates the device_id cookie — manual parse, only custom cookie we need
+// reads or creates the device_id cookie, its the only custom cookie we need so just parse it by hand
 function getOrSetDeviceId(req, res) {
   const header = req.headers.cookie || "";
   const match = header.split(";").map(p => p.trim()).find(p => p.startsWith("device_id="));
@@ -146,7 +146,7 @@ function generateInviteCode() {
   return `SARK-${block(4)}-${block(4)}`;
 }
 
-// submit (written)
+// submit a written application
 app.post("/submit", async (req, res) => {
   try {
     const user = req.session.user;
@@ -183,7 +183,7 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-// submit (video)
+// submit a video application
 app.post("/submit-video", async (req, res) => {
   try {
     const user = req.session.user;
@@ -229,7 +229,7 @@ app.post("/submit-video", async (req, res) => {
   }
 });
 
-// application draft (tied to discord account)
+// application draft, tied to the discord account
 app.get("/api/draft", async (req, res) => {
   const user = req.session.user;
   if (!user) return res.status(401).json({ error: "Not logged in with Discord" });
@@ -277,7 +277,7 @@ app.delete("/api/draft", async (req, res) => {
   }
 });
 
-// admin accounts (username/password, not discord)
+// admin accounts, username and password based, not discord
 
 // one-time bootstrap: first account created becomes 'owner', only works while admins table is empty
 app.post("/api/admin/setup", async (req, res) => {
@@ -410,7 +410,7 @@ app.post("/api/admin/generate-code", requireOwner, async (req, res) => {
   }
 });
 
-// Owner: view invite code history (used / unused)
+// owner: view invite code history, used and unused
 app.get("/api/admin/invite-codes", requireOwner, async (req, res) => {
   const { rows } = await pool.query(
     "SELECT code, created_at, used_at, used_by FROM admin_invite_codes ORDER BY created_at DESC"
@@ -449,7 +449,7 @@ app.post("/api/admin/remove-staff", requireOwner, async (req, res) => {
   }
 });
 
-// Owner: wipe all applications + ratings (admin accounts untouched)
+// owner: wipe all applications and ratings, admin accounts stay untouched
 app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
   try {
     const { confirmation } = req.body;
@@ -480,9 +480,9 @@ app.post("/api/admin/clear-apps", requireOwner, async (req, res) => {
   }
 });
 
-// staff dashboard api (requires admin login)
+// staff dashboard api, requires admin login
 
-// server-side sorted flag — survives refresh, same for every staff member
+// server-side sorted flag, survives a refresh and stays the same for every staff member
 app.get("/api/staff/sort-status", requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT sorted FROM app_settings WHERE id = 1");
@@ -554,7 +554,7 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
   }
 });
 
-// owner-only: clusters apps sharing a device cookie or reused IGN (alt-account signal)
+// owner only, clusters apps that share a device cookie or a reused ign as an alt account signal
 app.get("/api/staff/flagged", requireOwner, async (req, res) => {
   try {
     const { rows: pairs } = await pool.query(`
@@ -574,7 +574,7 @@ app.get("/api/staff/flagged", requireOwner, async (req, res) => {
 
     if (!pairs.length) return res.json({ clusters: [] });
 
-    // Union-find to group pairs into clusters (handles 3+ linked accounts).
+    // union-find groups the pairs into clusters, handles three or more linked accounts too
     const parent = new Map();
     const find = (id) => {
       if (!parent.has(id)) parent.set(id, id);

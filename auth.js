@@ -27,7 +27,7 @@ async function getAdminByUsername(username) {
   return rows[0] || null;
 }
 
-// Any logged-in admin (owner or staff)
+// any logged in admin, owner or staff
 async function requireAdmin(req, res, next) {
   if (!req.session.adminId) {
     return res.status(401).json({ error: "Not logged in" });
@@ -40,7 +40,7 @@ async function requireAdmin(req, res, next) {
   next();
 }
 
-// Owner-only actions (generating invite codes, wiping applications)
+// owner only actions, generating invite codes and wiping applications
 async function requireOwner(req, res, next) {
   if (!req.session.adminId) {
     return res.status(401).json({ error: "Not logged in" });
