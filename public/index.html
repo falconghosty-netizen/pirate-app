@@ -495,7 +495,7 @@
   <span class="corner-br"></span>
 
   <!-- LOGIN PAGE -->
-  <div id="loginPage">
+  <div id="loginPage" style="display:none;">
     <div class="header-ornament fade-in" style="animation-delay:0s;">
       <span></span>
       <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#d4af37">🪙</text></svg>
@@ -507,6 +507,20 @@
     <div class="fade-in" style="animation-delay:0.75s;">
       <a href="/login"><button>Login with Discord</button></a>
     </div>
+  </div>
+
+  <!-- APPLICATIONS CLOSED -->
+  <div id="closedPage">
+    <div class="header-ornament fade-in" style="animation-delay:0s;">
+      <span></span>
+      <svg width="28" height="28" viewBox="0 0 28 28"><text y="22" font-size="22" fill="#d4af37">🪙</text></svg>
+      <span></span>
+    </div>
+    <h1 class="fade-in" style="animation-delay:0.15s;">Wild West: Dreaded Gold Rush</h1>
+    <p class="subtitle fade-in" style="animation-delay:0.3s;">— Sarkovia Events —</p>
+    <p class="fade-in" style="animation-delay:0.5s; font-size:1rem; line-height:1.8; margin-top:22px;">
+      Applications have now been closed. Thank you to all who applied. Look out for announcements regarding acceptances in the next 24 hours or so. We hope to see you soon!
+    </p>
   </div>
 
   <!-- APPLICATION PAGE -->
@@ -824,7 +838,9 @@ async function init() {
   });
 }
 
-init();
+// Applications are closed — skip the login/application flow entirely and
+// leave the #closedPage message (visible by default) as the only thing shown.
+// init();
 
 // staff page
 function openStaff() {
