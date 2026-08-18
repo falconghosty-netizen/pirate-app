@@ -341,20 +341,26 @@
       border-top: 1px solid rgba(255,255,255,0.07);
     }
 
-    .rate-input {
-      width: 60px;
-      padding: 8px 10px;
-      border-radius: 8px;
+    .rate-boxes { display: flex; gap: 5px; flex-wrap: wrap; }
+    .rate-box {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.15);
       background: rgba(0,0,0,0.3);
       color: #fff;
-      font-size: 0.9rem;
-      text-align: center;
+      font-size: 0.8rem;
       font-weight: 700;
-      outline: none;
-      transition: border-color 0.18s;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
     }
-    .rate-input:focus { border-color: var(--accent); }
+    .rate-box:hover { border-color: rgba(255,255,255,0.35); }
+    .rate-box.selected {
+      background: rgba(91,140,255,0.2);
+      border-color: var(--accent);
+      color: #8fabf5;
+    }
 
     button.action {
       padding: 9px 18px;
@@ -370,15 +376,6 @@
     }
     button.action:hover { border-color: rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.08); }
 
-    button.action.rate {
-      background: rgba(91,140,255,0.15);
-      color: #8fabf5;
-      border-color: rgba(91,140,255,0.4);
-    }
-    button.action.rate:hover {
-      background: rgba(91,140,255,0.24);
-      color: #a8bfff;
-    }
     button.action.accept {
       background: rgba(76,175,125,0.15);
       color: #6ecb9c;
@@ -565,6 +562,8 @@
       <button class="filter-btn" data-rated="yes">Rated by Me <span class="count-badge" id="countRatedBadge">0</span></button>
     </div>
 
+    <div class="filters" id="ratingCountFilters"></div>
+
     <div class="sorted-banner" id="sortedBanner">
       <div class="sorted-banner-text">
         <strong>Applications Sorted</strong>
@@ -583,6 +582,7 @@
 let currentStatus = "pending";
 let currentType = "all";
 let currentRated = "all";
+let currentRatingCount = "all";
 let sortedView = false;
 let lastApps = [];
 let searchQuery = "";
@@ -870,6 +870,7 @@ async function loadApplications() {
 
   lastApps = data.applications || [];
   updateRatedCounts(lastApps);
+  updateRatingCountFilters(lastApps);
   renderList(lastApps);
 }
 
@@ -878,6 +879,24 @@ function updateRatedCounts(apps) {
   document.getElementById("countAllBadge").textContent = apps.length;
   document.getElementById("countRatedBadge").textContent = ratedCount;
   document.getElementById("countUnratedBadge").textContent = apps.length - ratedCount;
+}
+
+function updateRatingCountFilters(apps) {
+  const counts = {};
+  apps.forEach(a => counts[a.rating_count] = (counts[a.rating_count] || 0) + 1);
+  const values = Object.keys(counts).map(Number).sort((a, b) => a - b);
+
+  const el = document.getElementById("ratingCountFilters");
+  el.innerHTML = `<button class="filter-btn${currentRatingCount === "all" ? " active" : ""}" data-ratingcount="all">All Rating Counts</button>` +
+    values.map(v => `<button class="filter-btn${currentRatingCount === String(v) ? " active" : ""}" data-ratingcount="${v}">${v} rating${v !== 1 ? "s" : ""} <span class="count-badge">${counts[v]}</span></button>`).join("");
+
+  el.querySelectorAll("[data-ratingcount]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentRatingCount = btn.dataset.ratingcount;
+      updateRatingCountFilters(lastApps);
+      renderList(lastApps);
+    });
+  });
 }
 
 function escapeHtml(str) {
@@ -889,9 +908,13 @@ function renderList(rawApps) {
   const list = document.getElementById("list");
   const empty = document.getElementById("emptyMsg");
 
-  const apps = currentRated === "all"
+  let apps = currentRated === "all"
     ? rawApps
     : rawApps.filter(a => currentRated === "yes" ? (a.my_score !== null && a.my_score !== undefined) : (a.my_score === null || a.my_score === undefined));
+
+  if (currentRatingCount !== "all") {
+    apps = apps.filter(a => String(a.rating_count) === currentRatingCount);
+  }
 
   if (!apps.length) {
     list.innerHTML = "";
@@ -918,8 +941,14 @@ function renderList(rawApps) {
 }
 
 function wireCardButtons() {
-  document.querySelectorAll("[data-rate]").forEach(btn => {
-    btn.addEventListener("click", () => submitRating(btn.dataset.rate));
+  document.querySelectorAll(".rate-boxes").forEach(box => {
+    box.querySelectorAll(".rate-box").forEach(btn => {
+      btn.addEventListener("click", () => {
+        box.querySelectorAll(".rate-box").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        submitRating(box.dataset.app, parseInt(btn.dataset.n, 10));
+      });
+    });
   });
   document.querySelectorAll("[data-decide]").forEach(btn => {
     btn.addEventListener("click", () => decide(btn.dataset.decide, btn.dataset.decision));
@@ -983,10 +1012,13 @@ function renderCard(app) {
       <button class="action deny" data-decide="${app.id}" data-decision="deny">Deny</button>
     </div>` : "";
 
+  const rateBoxes = Array.from({ length: 10 }, (_, i) => i + 1)
+    .map(n => `<button type="button" class="rate-box${n === app.my_score ? " selected" : ""}" data-n="${n}">${n}</button>`)
+    .join("");
+
   const actionsHtml = app.status === "pending" ? `
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <input type="number" min="1" max="10" step="1" class="rate-input" id="rate-${app.id}" placeholder="1–10">
-      <button class="action rate" data-rate="${app.id}">${app.my_score ? "Update My Rating" : "Submit Rating"}</button>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="rate-boxes" data-app="${app.id}">${rateBoxes}</div>
       ${myRatingLabel}
     </div>
     ${decideButtons}
@@ -1021,15 +1053,7 @@ function renderCard(app) {
   `;
 }
 
-async function submitRating(applicationId) {
-  const input = document.getElementById(`rate-${applicationId}`);
-  const score = parseInt(input.value, 10);
-
-  if (isNaN(score) || score < 1 || score > 10) {
-    alert("Enter a score between 1 and 10.");
-    return;
-  }
-
+async function submitRating(applicationId, score) {
   const { ok, data } = await postJSON("/api/staff/rate", { applicationId, score });
   if (!ok) {
     alert("Failed to rate: " + (data.error || "unknown error"));
