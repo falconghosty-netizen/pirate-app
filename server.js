@@ -554,6 +554,29 @@ app.get("/api/staff/applications", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/api/staff/status-counts", requireAdmin, async (req, res) => {
+  try {
+    const type = req.query.type || "all";
+    let query = "SELECT status, COUNT(*)::int AS count FROM applications WHERE 1=1";
+    const params = [];
+    if (type !== "all") {
+      params.push(type);
+      query += ` AND type = $${params.length}`;
+    }
+    query += " GROUP BY status";
+
+    const { rows } = await pool.query(query, params);
+    const counts = { pending: 0, accepted: 0, denied: 0 };
+    rows.forEach(r => { counts[r.status] = r.count; });
+    counts.all = counts.pending + counts.accepted + counts.denied;
+
+    res.json(counts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load status counts" });
+  }
+});
+
 // owner only, clusters apps that share a device cookie or a reused ign as an alt account signal
 app.get("/api/staff/flagged", requireOwner, async (req, res) => {
   try {

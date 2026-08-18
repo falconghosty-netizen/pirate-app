@@ -205,7 +205,7 @@
       font-size: 0.72rem;
       font-weight: 700;
     }
-    .filter-btn.active .count-badge {
+    .filter-btn.active .count-badge, .tab-btn.active .count-badge {
       background: rgba(255,255,255,0.18);
     }
     .tab-btn:hover:not(.active), .filter-btn:hover:not(.active) {
@@ -544,10 +544,10 @@
     <input type="text" id="searchInput" class="search-input" placeholder="Enter application number #" inputmode="numeric" autocomplete="off">
     </div>
     <div class="tabs">
-      <button class="tab-btn active" data-status="pending">Pending</button>
-      <button class="tab-btn" data-status="accepted">Accepted</button>
-      <button class="tab-btn" data-status="denied">Denied</button>
-      <button class="tab-btn" data-status="all">All</button>
+      <button class="tab-btn active" data-status="pending">Pending <span class="count-badge" id="countPendingBadge">0</span></button>
+      <button class="tab-btn" data-status="accepted">Accepted <span class="count-badge" id="countAcceptedBadge">0</span></button>
+      <button class="tab-btn" data-status="denied">Denied <span class="count-badge" id="countDeniedBadge">0</span></button>
+      <button class="tab-btn" data-status="all">All <span class="count-badge" id="countAllStatusBadge">0</span></button>
     </div>
 
     <div class="filters">
@@ -871,6 +871,7 @@ async function loadApplications() {
   lastApps = data.applications || [];
   updateRatedCounts(lastApps);
   updateRatingCountFilters(lastApps);
+  updateStatusCounts();
   renderList(lastApps);
 }
 
@@ -879,6 +880,16 @@ function updateRatedCounts(apps) {
   document.getElementById("countAllBadge").textContent = apps.length;
   document.getElementById("countRatedBadge").textContent = ratedCount;
   document.getElementById("countUnratedBadge").textContent = apps.length - ratedCount;
+}
+
+async function updateStatusCounts() {
+  const res = await fetch(`/api/staff/status-counts?type=${currentType}`);
+  if (!res.ok) return;
+  const counts = await res.json();
+  document.getElementById("countPendingBadge").textContent = counts.pending;
+  document.getElementById("countAcceptedBadge").textContent = counts.accepted;
+  document.getElementById("countDeniedBadge").textContent = counts.denied;
+  document.getElementById("countAllStatusBadge").textContent = counts.all;
 }
 
 function updateRatingCountFilters(apps) {
