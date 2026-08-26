@@ -82,15 +82,6 @@
       font-size: 0.95rem;
     }
 
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.25);
-      margin: 28px 0 10px;
-    }
-
     .owner-panel {
       background: rgba(20,8,14,0.55);
       border: 1px solid rgba(255,255,255,0.1);
@@ -465,11 +456,6 @@
       font-size: 0.85rem;
       font-weight: 700;
       color: var(--amber);
-      margin-bottom: 2px;
-    }
-    .sorted-banner-text span {
-      font-size: 0.75rem;
-      color: rgba(217,165,92,0.7);
     }
 
     .search-row { margin-bottom: 16px; }
@@ -567,7 +553,6 @@
     <div class="sorted-banner" id="sortedBanner">
       <div class="sorted-banner-text">
         <strong>Applications Sorted</strong>
-        <span>Rated highest to lowest. Accept or deny below.</span>
       </div>
     </div>
 
@@ -609,7 +594,7 @@ async function init() {
   }
 
   document.getElementById("userLabel").style.display = "flex";
-  document.getElementById("userLabelText").textContent = `${me.username} · ${me.role}`;
+  document.getElementById("userLabelText").textContent = me.username;
   document.getElementById("logoutBtn").style.display = "inline-block";
   document.getElementById("dashboard").style.display = "block";
 
